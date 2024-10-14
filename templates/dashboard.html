@@ -1,28 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
-
 {% block content %}
-<div class="container">
-    <h1 class="title">Welcome, {{ username }}!</h1>
-
-    <div class="columns">
-        <div class="column is-one-fifth">
-            <aside class="menu">
-                <p class="menu-label">Management</p>
-                <ul class="menu-list">
-                    <li><a href="/users/">View Users</a></li>
-                    <li><a href="/add-user/">Add User</a></li>
-                    <li><a href="/logout/">Logout</a></li>
-                </ul>
-            </aside>
-        </div>
-
-        <div class="column">
-            {% block dashboard_content %}
-            <!-- This block will be filled with specific content later -->
-            {% endblock %}
-        </div>
-    </div>
-</div>
+    <h1 class="title">Welcome, {{ user['username'] }}</h1>
+    <p>Welcome to the admin dashboard!</p>
 {% endblock %}

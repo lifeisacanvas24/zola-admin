@@ -1,30 +1,29 @@
-<!-- templates/base.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <title>Admin Panel</title>
-</head>
-<body>
-    {% include 'header.html' %}
-
-    <div class="columns">
-        <div class="column is-one-quarter">
-            {% include 'sidebar.html' %}
+<!-- templates/header.html -->
+<header class="navbar">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            Admin Home
+        </a>
+        <span id="navbar-burger" class="navbar-burger burger" data-target="navbar-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+    </div>
+    <div id="navbar-menu" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="/">Home</a>
         </div>
-        <div class="column is-three-quarters">
-            <div class="container">
-                <h1 class="title">Admin Panel</h1>
-                <div id="content">
-                    {% block content %}{% endblock %}
+        <div class="navbar-end">
+            {% if user %}
+                <div class="navbar-item">
+                    <a class="button is-light" href="/logout/">Logout</a>
                 </div>
-            </div>
+            {% else %}
+                <div class="navbar-item">
+                    <a class="button is-light" href="/login/">Login</a>
+                </div>
+            {% endif %}
         </div>
     </div>
-
-    {% include 'footer.html' %}
-</body>
-</html>
+</header>
