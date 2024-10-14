@@ -1,24 +1,30 @@
-<!-- templates/modify_user.html -->
 {% extends "base.html" %}
+
+{% block title %}Modify User{% endblock %}
+
 {% block content %}
-<h2 class="subtitle">Modify User: {{ user.username }}</h2>
-<form method="post" action="/modify-user/{{ user.userid }}">
-    <div class="field">
-        <label class="label">Username</label>
-        <div class="control">
-            <input class="input" type="text" name="username" value="{{ user.username }}" required>
-        </div>
+<section class="section">
+    <div class="container">
+        <h1 class="title">Modify User</h1>
+        <form method="post" action="/modify-user/{{ user.userid }}/">
+            <div class="field">
+                <label class="label">Username</label>
+                <div class="control">
+                    <input class="input" type="text" name="username" value="{{ user.username }}" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Password</label>
+                <div class="control">
+                    <input class="input" type="password" name="password" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-link">Update User</button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="field">
-        <label class="label">Password</label>
-        <div class="control">
-            <input class="input" type="password" name="password" required>
-        </div>
-    </div>
-    <div class="field">
-        <div class="control">
-            <button class="button is-link">Modify User</button>
-        </div>
-    </div>
-</form>
+</section>
 {% endblock %}
