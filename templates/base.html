@@ -1,0 +1,43 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <!--   <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">   Link to your custom CSS -->
+    <title>Admin Panel</title>
+</head>
+<body>
+    <header class="navbar is-link">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/users/">Zola Admin</a>
+        </div>
+    </header>
+
+    <div class="columns">
+        <!-- Include the sidebar only if the user is logged in -->
+        {% if is_logged_in %}
+            <div class="column is-one-quarter">
+                {% include 'sidebar.html' %}
+            </div>
+        {% endif %}
+
+        <div class="{% if is_logged_in %}column is-three-quarters{% else %}column{% endif %}">
+            <div class="container">
+                <h1 class="title">Admin Panel</h1>
+                <div id="content">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>&copy; 2024 Zola Admin. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

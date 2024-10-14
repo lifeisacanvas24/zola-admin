@@ -1,0 +1,30 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Admin Panel</title>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="columns">
+        <div class="column is-one-quarter">
+            {% include 'sidebar.html' %}
+        </div>
+        <div class="column is-three-quarters">
+            <div class="container">
+                <h1 class="title">Admin Panel</h1>
+                <div id="content">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>
