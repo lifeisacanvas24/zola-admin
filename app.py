@@ -55,9 +55,13 @@ def get_logged_in_user(request: Request):
         user = conn.execute('SELECT * FROM users WHERE userid = ?', (user_id,)).fetchone()
     return user
 
+# Password hashing utility (reusable)
 def hash_password(password: str) -> str:
-    salted_password = password.encode('utf-8') + secret_key.encode('utf-8')
-    return pbkdf2_sha256.using(rounds=100000).hash(salted_password)
+    return pbkdf2_sha256.hash(password)
+
+# Password verification utility (reusable)
+def verify_password(password: str, hashed_password: str) -> bool:
+    return pbkdf2_sha256.verify(password, hashed_password)
 
 # Routes
 
@@ -83,7 +87,7 @@ async def login_post(request: Request, username: str = Form(...), password: str 
         user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
 
     # Check if user exists and verify the password
-    if user and pbkdf2_sha256.verify(password.encode('utf-8') + secret_key.encode('utf-8'), user['password']):
+    if user and verify_password(password, user['password']):
         request.session['user_id'] = user['userid']  # Store user ID in session
         return RedirectResponse(url="/dashboard/", status_code=303)  # Redirect to dashboard
 
