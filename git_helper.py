@@ -1,13 +1,12 @@
-# git_helper.py
 import os
 
 import git
 
 # Path to your Git repository (local path)
-REPO_PATH = os.getenv('GIT_REPO_PATH', '/Users/aravindkumar/Library/Mobile Documents/com~apple~CloudDocs/projects/git-repos/rust/lifeisacanvas24.github.io')  # Change this to your actual repository path
+git_repo_path = os.getenv("GIT_REPO_PATH", "default_git_repo_path")
 
 # Initialize the Git repository
-repo = git.Repo(REPO_PATH)
+repo = git.Repo(git_repo_path)
 
 def get_repo():
     """Returns the initialized Git repository."""
@@ -71,3 +70,19 @@ def commit_changes(message: str):
         push_changes()  # Push changes to remote
     except Exception as e:
         print(f"Error committing changes: {e}")
+
+# Function to commit specific template changes
+def commit_template_changes(template_name: str, message: str):
+    """Commits changes to a specific template file.
+
+    Args:
+        template_name (str): The name of the template file to commit.
+        message (str): The commit message.
+
+    """
+    try:
+        repo.index.add([f"templates/{template_name}"])  # Adjust the path accordingly
+        repo.index.commit(message)
+        push_changes()  # Push changes to remote
+    except Exception as e:
+        print(f"Error committing template changes: {e}")
