@@ -171,90 +171,103 @@
         </div>
     </section>
 
-    <!-- Toast UI CSS and JS -->
+    <!-- Toast UI Editor Core -->
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
+    <!-- Corrected Plugin Sources -->
+    <script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.js"></script>
+    <script src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
+    <script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
+
     <style>
-        /* Dark Mode Styles */
-        .tui-editor {
-            background-color: #1e1e1e;
-            color: #f5f5f5;
-        }
-        .tui-editor .tui-editor-contents {
-            background-color: #2e2e2e;
-            color: #f5f5f5;
-        }
-        .tui-editor .tui-editor-toolbar {
-            background-color: #2e2e2e;
-            color: #f5f5f5;
-        }
-        .tui-editor-preview {
-            background-color: #2e2e2e;
-            color: #f5f5f5;
-        }
+    /* Add this CSS to your stylesheet */
+    .tui-editor {
+      background-color: #1e1e1e; /* Dark background */
+      color: #f5f5f5; /* Light text color */
+    }
+    .tui-editor-contents {
+      font-size: 16px; /* Adjust font size */
+      line-height: 1.6; /* Better line height for readability */
+    }
+    .tui-editor-preview {
+      background-color: #2e2e2e; /* Dark background for preview */
+      color: #f5f5f5; /* Light text color for preview */
+    }
+
+    .tui-editor .tui-editor-toolbar {
+      background-color: #2e2e2e; /* Toolbar background */
+      color: #f5f5f5; /* Toolbar text */
+    }
+
+    /* Adjust other elements as needed */
+
     </style>
 
     <script>
-        // Subcategories data
-        const subcategories = {
-            "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"]
-        };
+        document.addEventListener('DOMContentLoaded', function() {
+            const Editor = toastui.Editor;
 
-        // Function to dynamically update subcategories based on selected category
-        function updateSubcategories() {
-            const categorySelect = document.getElementById('category');
-            const subcategorySelect = document.getElementById('subcategory');
-            const selectedCategory = categorySelect.value;
+            const editor = new Editor({
+                el: document.querySelector('#editor'),
+                height: '500px',
+                initialEditType: 'markdown',
+                previewStyle: 'vertical',
+                extendedAutolinks: true,
+                frontMatter: true,
+                plugins: [
+                    toastui.Editor.plugin.codeSyntaxHighlight,
+                    toastui.Editor.plugin.tableMergedCell,
+                    toastui.Editor.plugin.uml
+                ]
+            });
 
-            // Clear existing subcategories
-            subcategorySelect.innerHTML = '';
+            // Subcategories data
+            const subcategories = {
+                "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"]
+            };
 
-            // Check if the selected category has subcategories
-            if (subcategories.hasOwnProperty(selectedCategory) && subcategories[selectedCategory].length > 0) {
-                subcategories[selectedCategory].forEach(subcategory => {
-                    const option = document.createElement('option');
-                    option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
-                    option.textContent = subcategory;
-                    subcategorySelect.appendChild(option);
-                });
-                subcategorySelect.disabled = false;
-            } else {
-                const noneOption = document.createElement('option');
-                noneOption.value = "none";
-                noneOption.textContent = "None";
-                subcategorySelect.appendChild(noneOption);
-                subcategorySelect.disabled = true;
+            // Function to dynamically update subcategories based on selected category
+            function updateSubcategories() {
+                const categorySelect = document.getElementById('category');
+                const subcategorySelect = document.getElementById('subcategory');
+                const selectedCategory = categorySelect.value;
+
+                // Clear existing subcategories
+                subcategorySelect.innerHTML = '';
+
+                if (subcategories.hasOwnProperty(selectedCategory)) {
+                    subcategories[selectedCategory].forEach(subcategory => {
+                        const option = document.createElement('option');
+                        option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
+                        option.textContent = subcategory;
+                        subcategorySelect.appendChild(option);
+                    });
+                    subcategorySelect.disabled = false;
+                } else {
+                    const noneOption = document.createElement('option');
+                    noneOption.value = "none";
+                    noneOption.textContent = "None";
+                    subcategorySelect.appendChild(noneOption);
+                    subcategorySelect.disabled = true;
+                }
             }
-        }
 
-        // Initialize the Toast UI editor
-        let editor;
+            // Add event listener for category changes
+            const categorySelect = document.getElementById('category');
+            categorySelect.addEventListener('change', updateSubcategories);
 
-        // Function to set editor content to textarea on form submit
-        function submitContent() {
-            if (editor) {
+            // Initialize subcategories on page load
+            updateSubcategories();
+
+            // Submit editor content
+            function submitContent() {
                 const editorContent = editor.getMarkdown();
                 document.getElementById('editor-content').value = editorContent;
             }
-        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            editor = new toastui.Editor({
-                el: document.querySelector('#editor'),
-                initialEditType: 'markdown',
-                previewStyle: 'vertical',
-                height: '500px',
-                events: {
-                    load: function() {
-                        console.log("Editor loaded successfully");
-                    }
-                }
-            });
-
-            // Attach change event listener to category select
-            const categorySelect = document.getElementById('category');
-            categorySelect.addEventListener('change', updateSubcategories);
+            document.getElementById('template-form').onsubmit = submitContent;
         });
     </script>
+
 {% endblock %}
