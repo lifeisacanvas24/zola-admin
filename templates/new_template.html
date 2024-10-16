@@ -155,7 +155,7 @@
                 <div class="field">
                     <label class="label">Content</label>
                     <div class="control">
-                        <div id="editor"></div>
+                        <div id="editor" style="min-height: 500px; border: 1px solid #ccc;"></div>
                     </div>
                 </div>
 
@@ -172,91 +172,89 @@
     </section>
 
     <!-- Toast UI CSS and JS -->
-       <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-       <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
-       <script>
-           // Subcategories data - can be easily extended in the future
-           const subcategories = {
-               "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"]
-               // Example of how to add a new category with subcategories in the future:
-               // "technology": ["Gadgets", "Software", "AI", "Blockchain"]
-           };
+    <style>
+        /* Dark Mode Styles */
+        .tui-editor {
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+        }
+        .tui-editor .tui-editor-contents {
+            background-color: #2e2e2e;
+            color: #f5f5f5;
+        }
+        .tui-editor .tui-editor-toolbar {
+            background-color: #2e2e2e;
+            color: #f5f5f5;
+        }
+        .tui-editor-preview {
+            background-color: #2e2e2e;
+            color: #f5f5f5;
+        }
+    </style>
 
-           // Function to dynamically update subcategories based on selected category
-           function updateSubcategories() {
-               const categorySelect = document.getElementById('category');
-               const subcategorySelect = document.getElementById('subcategory');
-               const selectedCategory = categorySelect.value;
+    <script>
+        // Subcategories data
+        const subcategories = {
+            "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"]
+        };
 
-               console.log("Selected category:", selectedCategory);  // Debug log
+        // Function to dynamically update subcategories based on selected category
+        function updateSubcategories() {
+            const categorySelect = document.getElementById('category');
+            const subcategorySelect = document.getElementById('subcategory');
+            const selectedCategory = categorySelect.value;
 
-               // Clear existing subcategories
-               subcategorySelect.innerHTML = '';
+            // Clear existing subcategories
+            subcategorySelect.innerHTML = '';
 
-               // Check if the selected category has subcategories
-               if (subcategories.hasOwnProperty(selectedCategory) && subcategories[selectedCategory].length > 0) {
-                   subcategories[selectedCategory].forEach(subcategory => {
-                       const option = document.createElement('option');
-                       option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
-                       option.textContent = subcategory;
-                       subcategorySelect.appendChild(option);
-                   });
-                   console.log(`Subcategories added for ${selectedCategory}`);  // Debug log
-                   subcategorySelect.disabled = false;
-               } else {
-                   // Add 'None' option for categories without subcategories
-                   const noneOption = document.createElement('option');
-                   noneOption.value = "none";
-                   noneOption.textContent = "None";
-                   subcategorySelect.appendChild(noneOption);
-                   console.log("No subcategories for this category, added 'None' option");  // Debug log
-                   subcategorySelect.disabled = true;
-               }
-           }
+            // Check if the selected category has subcategories
+            if (subcategories.hasOwnProperty(selectedCategory) && subcategories[selectedCategory].length > 0) {
+                subcategories[selectedCategory].forEach(subcategory => {
+                    const option = document.createElement('option');
+                    option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
+                    option.textContent = subcategory;
+                    subcategorySelect.appendChild(option);
+                });
+                subcategorySelect.disabled = false;
+            } else {
+                const noneOption = document.createElement('option');
+                noneOption.value = "none";
+                noneOption.textContent = "None";
+                subcategorySelect.appendChild(noneOption);
+                subcategorySelect.disabled = true;
+            }
+        }
 
-           // Initialize the Toast UI editor
-           let editor;
+        // Initialize the Toast UI editor
+        let editor;
 
-           // Function to set editor content to textarea on form submit
-           function submitContent() {
-               const editorContent = editor.getMarkdown();
-               document.getElementById('editor-content').value = editorContent;
-           }
+        // Function to set editor content to textarea on form submit
+        function submitContent() {
+            if (editor) {
+                const editorContent = editor.getMarkdown();
+                document.getElementById('editor-content').value = editorContent;
+            }
+        }
 
-           // Initialize everything when the DOM is fully loaded
-           document.addEventListener('DOMContentLoaded', function() {
-               console.log("DOM fully loaded");  // Debug log
+        document.addEventListener('DOMContentLoaded', function() {
+            editor = new toastui.Editor({
+                el: document.querySelector('#editor'),
+                initialEditType: 'markdown',
+                previewStyle: 'vertical',
+                height: '500px',
+                events: {
+                    load: function() {
+                        console.log("Editor loaded successfully");
+                    }
+                }
+            });
 
-               // Initialize the Toast UI editor
-               try {
-                   editor = new toastui.Editor({
-                       el: document.querySelector('#editor'),
-                       initialEditType: 'markdown',
-                       previewStyle: 'vertical',
-                       height: '500px',
-                       initialValue: '',
-                       plugins: [
-                           toastui.Editor.plugin.chart,
-                           toastui.Editor.plugin.codeSyntaxHighlight,
-                       ]
-                   });
-                   console.log("Toast UI Editor initialized successfully");  // Debug log
-               } catch (error) {
-                   console.error("Error initializing Toast UI Editor:", error);  // Debug log
-               }
-
-               // Add event listener for category changes
-               const categorySelect = document.getElementById('category');
-               if (categorySelect) {
-                   categorySelect.addEventListener('change', updateSubcategories);
-                   console.log("Event listener added to category select");  // Debug log
-               } else {
-                   console.error("Category select element not found");  // Debug log
-               }
-
-               // Call this once on page load to populate initial subcategories
-               updateSubcategories();
-           });
-       </script>
-   {% endblock %}
+            // Attach change event listener to category select
+            const categorySelect = document.getElementById('category');
+            categorySelect.addEventListener('change', updateSubcategories);
+        });
+    </script>
+{% endblock %}
