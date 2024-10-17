@@ -4,8 +4,8 @@
     <section class="section">
         <div class="container">
             <h1 class="title">Create New Template</h1>
-            <form action="/templates/new/" method="post" id="template-form" onsubmit="submitContent()">
-                <!-- Template Name (serves as Title) -->
+            <form action="/markdown/post/" method="post" id="template-form" onsubmit="submitContent()">
+                <!-- Template Name -->
                 <div class="field">
                     <label class="label" for="template_name">Template Name</label>
                     <div class="control">
@@ -18,7 +18,7 @@
                     <label class="label" for="category">Category</label>
                     <div class="control">
                         <div class="select">
-                            <select id="category" name="category">
+                            <select id="category" name="category" required>
                                 <option value="none">Please Choose Category</option>
                                 <option value="lifestyle">Lifestyle</option>
                                 <option value="reviews">Reviews</option>
@@ -30,12 +30,12 @@
                     </div>
                 </div>
 
-                <!-- Subcategory (Dynamically updated) -->
+                <!-- Subcategory -->
                 <div class="field">
                     <label class="label" for="subcategory">Subcategory</label>
                     <div class="control">
                         <div class="select">
-                            <select id="subcategory" name="subcategory">
+                            <select id="subcategory" name="subcategory" required>
                                 <option value="none">None</option>
                             </select>
                         </div>
@@ -44,7 +44,6 @@
 
                 <!-- Front Matter Section -->
                 <h3 class="subtitle">Front Matter</h3>
-
                 <div class="field">
                     <label class="label" for="description">Description</label>
                     <div class="control">
@@ -74,7 +73,6 @@
 
                 <!-- Open Graph Metadata Section -->
                 <h3 class="subtitle">Open Graph Metadata</h3>
-
                 <div class="field">
                     <label class="label" for="og_title">OG Title</label>
                     <div class="control">
@@ -112,7 +110,6 @@
 
                 <!-- Additional Meta Tags Section -->
                 <h3 class="subtitle">Additional Meta Tags</h3>
-
                 <div class="field">
                     <label class="label" for="author">Author Name</label>
                     <div class="control">
@@ -129,7 +126,6 @@
 
                 <!-- JSON-LD Metadata Section -->
                 <h3 class="subtitle">JSON-LD Metadata</h3>
-
                 <div class="field">
                     <label class="label" for="json_ld_name">JSON-LD Name</label>
                     <div class="control">
@@ -159,7 +155,6 @@
                     </div>
                 </div>
 
-                <!-- Hidden textarea for editor content -->
                 <textarea name="content" id="editor-content" style="display:none;" required></textarea>
 
                 <div class="field">
@@ -181,95 +176,88 @@
     <script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
 
     <style>
-    /* Add this CSS to your stylesheet */
-    .tui-editor {
-      background-color: #1e1e1e; /* Dark background */
-      color: #f5f5f5; /* Light text color */
-    }
-    .tui-editor-contents {
-      font-size: 16px; /* Adjust font size */
-      line-height: 1.6; /* Better line height for readability */
-    }
-    .tui-editor-preview {
-      background-color: #2e2e2e; /* Dark background for preview */
-      color: #f5f5f5; /* Light text color for preview */
-    }
-
-    .tui-editor .tui-editor-toolbar {
-      background-color: #2e2e2e; /* Toolbar background */
-      color: #f5f5f5; /* Toolbar text */
-    }
-
-    /* Adjust other elements as needed */
-
+        .tui-editor {
+            background-color: #1e1e1e; /* Example for dark mode */
+            color: white;
+        }
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const Editor = toastui.Editor;
+    document.addEventListener('DOMContentLoaded', function() {
+           const Editor = toastui.Editor;
 
-            const editor = new Editor({
-                el: document.querySelector('#editor'),
-                height: '500px',
-                initialEditType: 'markdown',
-                previewStyle: 'vertical',
-                extendedAutolinks: true,
-                frontMatter: true,
-                plugins: [
-                    toastui.Editor.plugin.codeSyntaxHighlight,
-                    toastui.Editor.plugin.tableMergedCell,
-                    toastui.Editor.plugin.uml
-                ]
-            });
+           const editor = new Editor({
+               el: document.querySelector('#editor'),
+               height: '500px',
+    initialEditType: 'markdown',
+                    previewStyle: 'vertical',
+                    extendedAutolinks: true,
+                    frontMatter: true,
+               plugins: [toastui.Editor.plugin.codeSyntaxHighlight, toastui.Editor.plugin.tableMergedCell, toastui.Editor.plugin.uml],
+               hook: {
+                   addImageBlobHook: (blob, callback) => {
+                       const reader = new FileReader();
+                       reader.onload = () => {
+                           callback(reader.result, blob.name);
+                       };
+                       reader.readAsDataURL(blob);
+                   }
+               }
+           });
 
-            // Subcategories data
-            const subcategories = {
-                "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"]
-            };
+           window.submitContent = function() {
+               const content = editor.getHTML();
+               document.getElementById('editor-content').value = content;
+               return true; // Allows form submission
+           };
 
-            // Function to dynamically update subcategories based on selected category
-            function updateSubcategories() {
-                const categorySelect = document.getElementById('category');
-                const subcategorySelect = document.getElementById('subcategory');
-                const selectedCategory = categorySelect.value;
+             // Subcategories data
+             const subcategories = {
+                 "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"],
+                 //"technology": ["Gadgets", "AI", "Programming", "LLM"]
 
-                // Clear existing subcategories
-                subcategorySelect.innerHTML = '';
+             };
 
-                if (subcategories.hasOwnProperty(selectedCategory)) {
-                    subcategories[selectedCategory].forEach(subcategory => {
-                        const option = document.createElement('option');
-                        option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = subcategory;
-                        subcategorySelect.appendChild(option);
-                    });
-                    subcategorySelect.disabled = false;
-                } else {
-                    const noneOption = document.createElement('option');
-                    noneOption.value = "none";
-                    noneOption.textContent = "None";
-                    subcategorySelect.appendChild(noneOption);
-                    subcategorySelect.disabled = true;
-                }
-            }
+             // Function to dynamically update subcategories based on selected category
+             function updateSubcategories() {
+                 const categorySelect = document.getElementById('category');
+                 const subcategorySelect = document.getElementById('subcategory');
+                 const selectedCategory = categorySelect.value;
 
-            // Add event listener for category changes
-            const categorySelect = document.getElementById('category');
-            categorySelect.addEventListener('change', updateSubcategories);
+                 // Clear existing subcategories
+                 subcategorySelect.innerHTML = '';
 
-            // Initialize subcategories on page load
-            updateSubcategories();
+                 if (subcategories.hasOwnProperty(selectedCategory)) {
+                     subcategories[selectedCategory].forEach(subcategory => {
+                         const option = document.createElement('option');
+                         option.value = subcategory.toLowerCase().replace(/\s+/g, '-');
+                         option.textContent = subcategory;
+                         subcategorySelect.appendChild(option);
+                     });
+                     subcategorySelect.disabled = false;
+                 } else {
+                     const noneOption = document.createElement('option');
+                     noneOption.value = "none";
+                     noneOption.textContent = "None";
+                     subcategorySelect.appendChild(noneOption);
+                     subcategorySelect.disabled = true;
+                 }
+             }
 
-            document.getElementById('template-form').onsubmit = function(e) {
-                const editorContent = editor.getMarkdown();
-                document.getElementById('editor-content').value = editorContent;
+             // Add event listener for category changes
+             const categorySelect = document.getElementById('category');
+             categorySelect.addEventListener('change', updateSubcategories);
 
-                if (!confirm('Are you sure you want to create this template?')) {
-                    e.preventDefault(); // Prevent form submission
-                }
-            };
+             // Initialize subcategories on page load
+             updateSubcategories();
 
-        });
-    </script>
+             // Submit editor content
+             function submitContent() {
+                 const editorContent = editor.getMarkdown();
+                 document.getElementById('editor-content').value = editorContent;
+             }
 
+             document.getElementById('template-form').onsubmit = submitContent;
+         });
+     </script>
 {% endblock %}
