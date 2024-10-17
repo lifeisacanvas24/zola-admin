@@ -1,6 +1,7 @@
 import logging
 import os
 import sqlite3
+from datetime import datetime  # <-- Add this import
 from urllib.parse import quote
 
 from dotenv import load_dotenv
@@ -574,7 +575,7 @@ async def delete_template(request: Request, template_name: str):
 
     return RedirectResponse(url="/templates/", status_code=303)
 
-@app.get("/new-post/", response_class=HTMLResponse)
+@app.get("/add-new-post/", response_class=HTMLResponse)
 async def new_post(request: Request):
     user = get_logged_in_user(request)
     if not user:
@@ -582,65 +583,104 @@ async def new_post(request: Request):
 
     return templates.TemplateResponse("new_post.html", {"request": request, "user": user})
 
-@app.post("/create-template/")
-async def create_template(
+@app.post("/add-new-post/")
+async def add_new_post(
     request: Request,
     template_name: str = Form(...),
     category: str = Form(...),
-    subcategory: str = Form(...),
+    subcategory: str = Form(None),  # Subcategory is optional
     description: str = Form(...),
     keywords: str = Form(...),
-    date: str = Form(...),
-    draft: bool = Form(...),
-    og_title: str = Form(...),
-    og_description: str = Form(...),
-    og_image: str = Form(...),
-    og_url: str = Form(...),
-    og_type: str = Form(...),
+    date: str = Form(None),  # Optional, auto-generate if not provided
+    draft: bool = Form(False),  # Draft should not be mandatory
+    og_title: str = Form(None),  # Optional OG metadata fields
+    og_description: str = Form(None),
+    og_image: str = Form(None),
+    og_url: str = Form(None),
+    og_type: str = Form(None),
     author: str = Form(...),
-    viewport: str = Form(...),
-    json_ld_name: str = Form(...),
-    json_ld_description: str = Form(...),
-    json_ld_url: str = Form(...),
-    content: str = Form(...),  # Content from the editor
+    viewport: str = Form(None),
+    json_ld_name: str = Form(None),
+    json_ld_description: str = Form(None),
+    json_ld_url: str = Form(None),
+    content: str = Form(...),
 ):
-    # Generate the front matter
+    subcategory_path = subcategory if subcategory else ""
+
+    # Handling date - default to now if not provided
+    post_date = date if date else datetime.now().isoformat()
+
+    # Prepare front matter
     front_matter = f"""+++
 title = "{template_name}"
 description = "{description}"
-date = "{datetime.now().isoformat()}"
+date = "{post_date}"
 draft = {str(draft).lower()}
 updated = "{datetime.now().isoformat()}"
 reading_time = "N/A"
-social_image = "{og_image}"
+social_image = "{og_image or ''}"
 tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
-categories = ["{category}", "{subcategory}"]
+categories = ["{category}", "{subcategory_path}"]
 +++"""
 
-    # Combine front matter with content
-    template_content = front_matter + "\n" + content  # Combine front matter and content
+    # Handle Open Graph metadata (Optional)
+    if og_title or og_description or og_image or og_url or og_type:
+        front_matter += f"""
+[open_graph]
+title = "{og_title or ''}"
+description = "{og_description or ''}"
+image = "{og_image or ''}"
+url = "{og_url or ''}"
+type = "{og_type or ''}"
+"""
 
-    # Create a filename for the template
+    # Prepare JSON-LD data (Optional)
+    json_ld_metadata = ""
+    if json_ld_name or json_ld_description or json_ld_url:
+        json_ld_metadata = f"""
+<script type="application/ld+json">
+{{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "name": "{json_ld_name or ''}",
+  "description": "{json_ld_description or ''}",
+  "url": "{json_ld_url or ''}",
+  "author": "{author}",
+  "datePublished": "{post_date}"
+}}
+</script>
+"""
+
+    # Generate file path
     template_file_name = f"{template_name.replace(' ', '-').lower()}.md"
-    template_path = os.path.join(TEMPLATE_CONTENT_PATH, template_file_name)
+    template_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory_path, template_file_name)
 
-    # Write the template content to a file
+    # Write content to file (front matter + content + JSON-LD)
     try:
+        os.makedirs(os.path.dirname(template_path), exist_ok=True)
         with open(template_path, 'w') as f:
-            f.write(template_content)
+            f.write(front_matter + "\n" + content + "\n" + json_ld_metadata)
     except OSError as e:
         logging.error(f"Error writing to file: {template_path}, {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to create the template file.")
 
-    # Commit and push to Git
+    # Handle Git operations
     try:
         repo = Repo(GIT_REPO_PATH)
         repo.git.add(template_path)
-        repo.index.commit(f"Add new template: {template_name}")
+        repo.index.commit(f"Add new post: {template_name}")
         origin = repo.remote(name="origin")
         origin.push()
     except Exception as e:
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-    return RedirectResponse(url="/markdown/", status_code=303)
+    return RedirectResponse(url="/new-post-added/", status_code=302)
+
+@app.get("/add-new-post/", response_class=HTMLResponse)
+async def new_post_added(request: Request):
+    user = get_logged_in_user(request)
+    if not user:
+        return RedirectResponse(url="/login/", status_code=303)
+
+    return templates.TemplateResponse("success.html", {"request": request})

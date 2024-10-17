@@ -23,3 +23,11 @@ async def init_db():
 async def get_async_session() -> AsyncSession:
     async with async_session() as session:
         yield session
+
+class NewPost(BaseModel):
+    template_name: str
+    category: str
+    subcategory: Optional[str] = None
+    description: str
+    draft: Optional[bool] = False
+    content: str

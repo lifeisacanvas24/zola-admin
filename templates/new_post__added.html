@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Post Created Successfully!</h1>
+        <p class="subtitle">Your new post "<strong>{{ template_name }}</strong>" has been created successfully.</p>
+
+        <div class="buttons">
+            <a class="button is-link" href="/markdown/">View Markdown List</a>
+            <a class="button is-primary" href="/markdown/{{ category }}/{{ subcategory }}/{{ template_name | replace(' ', '-') | lower() }}.md">View New Post</a>
+            <a class="button is-info" href="/add-new-post/">Add Another Post</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
