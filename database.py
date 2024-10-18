@@ -1,14 +1,15 @@
 # database.py
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+from sqlalchemy import Boolean, Column, Integer, String, Text, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite+aiosqlite:///zolanew_admin.db"
-engine = create_async_engine(DATABASE_URL, echo=True)
-async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+DATABASE_URL = "sqlite:///zolanew_admin.db"  # Removed async
+engine = create_engine(DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# User model
 class User(Base):
     __tablename__ = "users"
 
@@ -16,18 +17,26 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password = Column(String)
 
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+# New Post model
+class Post(Base):
+    __tablename__ = "posts"
 
-async def get_async_session() -> AsyncSession:
-    async with async_session() as session:
-        yield session
+    id = Column(Integer, primary_key=True, index=True)
+    template_name = Column(String, index=True)
+    category = Column(String, index=True)
+    subcategory = Column(String, index=True, nullable=True)
+    description = Column(Text)
+    draft = Column(Boolean, default=False)
+    content = Column(Text)
+    date_created = Column(String)  # Store date as string for simplicity
 
-class NewPost(BaseModel):
-    template_name: str
-    category: str
-    subcategory: Optional[str] = None
-    description: str
-    draft: Optional[bool] = False
-    content: str
+# Database initialization
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

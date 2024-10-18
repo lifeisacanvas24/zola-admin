@@ -629,52 +629,43 @@ async def add_new_post(
     front_matter = f"""+++
 title = "{template_name}"
 description = "{description}"
+keywords = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
 date = "{post_date}"
 draft = {str(draft).lower()}
-updated = "{datetime.now().isoformat()}"
-reading_time = "N/A"
-social_image = "{og_image or ''}"
-tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
-categories = ["{category}", "{subcategory_path}"]
-+++"""
 
-    # Handle Open Graph metadata (Optional)
-    if og_title or og_description or og_image or og_url or og_type:
-        front_matter += f"""
-[open_graph]
-title = "{og_title or ''}"
-description = "{og_description or ''}"
-image = "{og_image or ''}"
-url = "{og_url or ''}"
-type = "{og_type or ''}"
-"""
+[extra]
+og_title = "{og_title or ''}"
+og_description = "{og_description or ''}"
+og_image = "{og_image or ''}"
+og_url = "{og_url or ''}"
+og_type = "{og_type or ''}"
 
-    # Prepare JSON-LD data (Optional)
-    json_ld_metadata = ""
-    if json_ld_name or json_ld_description or json_ld_url:
-        json_ld_metadata = f"""
-<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "name": "{json_ld_name or ''}",
-  "description": "{json_ld_description or ''}",
-  "url": "{json_ld_url or ''}",
-  "author": "{author}",
-  "datePublished": "{post_date}"
-}}
-</script>
+[custom]
+additional_meta_tags = [
+    {{ name = "author", content = "{author}" }},
+    {{ name = "viewport", content = "{viewport or ''}" }}
+]
+
+[json_ld]
+type = "WebPage"
+context = "https://schema.org"
+itemprop = [
+    {{ name = "{json_ld_name or ''}" }},
+    {{ description = "{json_ld_description or ''}" }},
+    {{ url = "{json_ld_url or ''}" }}
+]
++++
 """
 
     # Generate file path
     template_file_name = f"{template_name.replace(' ', '-').lower()}.md"
     template_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory_path, template_file_name)
 
-    # Write content to file (front matter + content + JSON-LD)
+    # Write content to file (front matter + content)
     try:
         os.makedirs(os.path.dirname(template_path), exist_ok=True)
         with open(template_path, 'w') as f:
-            f.write(front_matter + "\n" + content + "\n" + json_ld_metadata)
+            f.write(front_matter + "\n" + content + "\n")
     except OSError as e:
         logging.error(f"Error writing to file: {template_path}, {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to create the template file.")
@@ -690,10 +681,10 @@ type = "{og_type or ''}"
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-        return RedirectResponse(
-    url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
-    status_code=302
-)
+    return RedirectResponse(
+        url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
+        status_code=302
+    )
 
 @app.get("/new-post-added/", response_class=HTMLResponse)
 async def new_post_added(

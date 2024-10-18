@@ -1,5 +1,4 @@
-#app.py
-mport logging
+import logging
 import os
 import sqlite3
 from datetime import datetime  # <-- Add this import
@@ -18,11 +17,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
 from git_helper import add_file, list_files, remove_file
-
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-logging.basicConfig(level=logging.INFO)
-
 
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -71,17 +65,12 @@ def get_db_connection():
 
 # Helper function to get the logged-in user
 def get_logged_in_user(request: Request):
-    user_id = get_current_user_id_from_session(request)
-
-    if user_id:
-        with get_db_connection() as conn:
-            # Remove 'role' from the selection
-            user = conn.execute('SELECT userid, username FROM users WHERE userid = ?', (user_id,)).fetchone()
-            return user  # Now this only returns userid and username
-    return None
-
-def get_current_user_id_from_session(request: Request):
-    return request.session.get("user_id")
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return None
+    with get_db_connection() as conn:
+        user = conn.execute('SELECT * FROM users WHERE userid = ?', (user_id,)).fetchone()
+    return user
 
 # Helper function to hash the password
 def hash_password(password: str) -> str:
@@ -116,15 +105,15 @@ async def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login/")
-async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+async def login_post(request: Request, username: str = Form(...), password: str = Form(...)):
     with get_db_connection() as conn:
-        user = conn.execute('SELECT userid, username, password FROM users WHERE username = ?', (username,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
 
-    if user and verify_password(password, user["password"]):  # Use your verify function
-        request.session["user_id"] = user["userid"]  # Store user ID in session
+    if user and verify_password(password, user['password']):
+        request.session['user_id'] = user['userid']
         return RedirectResponse(url="/dashboard/", status_code=303)
 
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 @app.get("/logout/")
 async def logout(request: Request):
@@ -184,7 +173,7 @@ async def modify_user_post(request: Request, userid: int, username: str = Form(.
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
-    hashed_password = hash_password(password)  # Use your hash function
+    hashed_password = hash_password(password)
 
     with get_db_connection() as conn:
         conn.execute('UPDATE users SET username = ?, password = ? WHERE userid = ?', (username, hashed_password, userid))
@@ -297,7 +286,7 @@ def parse_front_matter(markdown_content):
         return front_matter, content
     return "", markdown_content  # No front matter found
 
-@app.get("/list-posts/", response_class=HTMLResponse)
+@app.get("/markdown/", response_class=HTMLResponse)
 async def get_markdown_files(request: Request, page: int = 1, section: str = None):
     user = get_logged_in_user(request)
 
@@ -312,7 +301,7 @@ async def get_markdown_files(request: Request, page: int = 1, section: str = Non
     total_pages = (total_files + 19) // 20  # Round up for total pages
 
     # Render the template with the necessary context
-    return templates.TemplateResponse("list_posts.html", {
+    return templates.TemplateResponse("markdown_list.html", {
         "request": request,
         "markdown_files": markdown_files_list,
         "user": user,
@@ -463,7 +452,7 @@ async def delete_markdown_file(request: Request, full_path: str):
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the deletion to the repository.")
 
-    return RedirectResponse(url="/list-posts/", status_code=303)
+    return RedirectResponse(url="/markdown/", status_code=303)
 
 @app.get("/templates/", response_class=HTMLResponse)
 async def templates_index(request: Request):
@@ -595,16 +584,6 @@ async def new_post(request: Request):
 
     return templates.TemplateResponse("new_post.html", {"request": request, "user": user})
 
-# Define the Pydantic model for new posts
-class NewPost(BaseModel):
-    template_name: str
-    category: str
-    subcategory: Optional[str] = None
-    description: str
-    draft: Optional[bool] = False
-    content: str
-    date: Optional[str] = None  # Optional date field
-
 @app.post("/add-new-post/")
 async def add_new_post(
     request: Request,
@@ -626,19 +605,11 @@ async def add_new_post(
     json_ld_description: str = Form(None),
     json_ld_url: str = Form(None),
     content: str = Form(...),
-    db: Session = Depends(get_db),  # Using synchronous session
 ):
     subcategory_path = subcategory if subcategory else ""
 
     # Handling date - default to now if not provided
     post_date = date if date else datetime.now().isoformat()
-
-    # Prepare Open Graph metadata (with default values)
-    og_title = og_title if og_title else template_name
-    og_description = og_description if og_description else description
-    og_image = og_image if og_image else "default_image_url.png"
-    og_url = og_url if og_url else f"http://yourwebsite.com/blog/{category}/{subcategory}/{template_name.replace(' ', '-').lower()}.md"
-    og_type = og_type if og_type else "article"
 
     # Prepare front matter
     front_matter = f"""+++
@@ -648,20 +619,20 @@ date = "{post_date}"
 draft = {str(draft).lower()}
 updated = "{datetime.now().isoformat()}"
 reading_time = "N/A"
-social_image = "{og_image}"
+social_image = "{og_image or ''}"
 tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
 categories = ["{category}", "{subcategory_path}"]
-+++
-"""
++++"""
 
-    # Handle Open Graph metadata
-    front_matter += f"""
+    # Handle Open Graph metadata (Optional)
+    if og_title or og_description or og_image or og_url or og_type:
+        front_matter += f"""
 [open_graph]
-title = "{og_title}"
-description = "{og_description}"
-image = "{og_image}"
-url = "{og_url}"
-type = "{og_type}"
+title = "{og_title or ''}"
+description = "{og_description or ''}"
+image = "{og_image or ''}"
+url = "{og_url or ''}"
+type = "{og_type or ''}"
 """
 
     # Prepare JSON-LD data (Optional)
@@ -696,7 +667,7 @@ type = "{og_type}"
 
     # Handle Git operations
     try:
-        repo = Repo("GIT_REPO_PATH")  # Adjust the path as needed
+        repo = Repo(GIT_REPO_PATH)
         repo.git.add(template_path)
         repo.index.commit(f"Add new post: {template_name}")
         origin = repo.remote(name="origin")
@@ -706,9 +677,8 @@ type = "{og_type}"
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
     return RedirectResponse(
-        url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
-        status_code=302
-    )
+    url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory)}",
+    status_code=302)
 
 @app.get("/new-post-added/", response_class=HTMLResponse)
 async def new_post_added(
