@@ -77,6 +77,9 @@
                 <label class="label" for="og_title">OG Title</label>
                 <div class="control">
                     <input class="input" type="text" id="og_title" name="og_title">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="og_title" id="copy_og_title"> Copy from Template Name
+                    </label>
                 </div>
             </div>
 
@@ -84,6 +87,9 @@
                 <label class="label" for="og_description">OG Description</label>
                 <div class="control">
                     <input class="input" type="text" id="og_description" name="og_description">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="og_description" id="copy_og_description"> Copy from Description
+                    </label>
                 </div>
             </div>
 
@@ -91,6 +97,9 @@
                 <label class="label" for="og_image">OG Image Path</label>
                 <div class="control">
                     <input class="input" type="text" id="og_image" name="og_image">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="og_image" id="copy_og_image"> Copy from Description
+                    </label>
                 </div>
             </div>
 
@@ -98,6 +107,9 @@
                 <label class="label" for="og_url">OG URL</label>
                 <div class="control">
                     <input class="input" type="text" id="og_url" name="og_url">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="og_url" id="copy_og_url"> Generate from Template Name and Category
+                    </label>
                 </div>
             </div>
 
@@ -130,6 +142,9 @@
                 <label class="label" for="json_ld_name">JSON-LD Name</label>
                 <div class="control">
                     <input class="input" type="text" id="json_ld_name" name="json_ld_name">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="json_ld_name" id="copy_json_ld_name"> Copy from OG Title
+                    </label>
                 </div>
             </div>
 
@@ -137,6 +152,9 @@
                 <label class="label" for="json_ld_description">JSON-LD Description</label>
                 <div class="control">
                     <input class="input" type="text" id="json_ld_description" name="json_ld_description">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="json_ld_description" id="copy_json_ld_description"> Copy from OG Description
+                    </label>
                 </div>
             </div>
 
@@ -144,6 +162,9 @@
                 <label class="label" for="json_ld_url">JSON-LD URL</label>
                 <div class="control">
                     <input class="input" type="text" id="json_ld_url" name="json_ld_url">
+                    <label class="checkbox">
+                        <input type="checkbox" class="copy-meta" data-target="json_ld_url" id="copy_json_ld_url"> Generate from OG URL
+                    </label>
                 </div>
             </div>
 
@@ -193,37 +214,95 @@ document.addEventListener('DOMContentLoaded', function() {
         ],
         hook: {
             addImageBlobHook: (blob, callback) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    callback(reader.result, blob.name);
-                };
-                reader.readAsDataURL(blob);
+                const url = URL.createObjectURL(blob);
+                callback(url, blob.name);
             }
         }
     });
 
-    // Form Validation
-    window.validateForm = function() {
-        const editorContent = editor.getHTML(); // Get the content from the editor
-        document.getElementById('editor-content').value = editorContent; // Transfer to hidden textarea
+    // Handle form submission to copy editor content to textarea
+    document.querySelector('#template-form').addEventListener('submit', function() {
+        document.querySelector('#editor-content').value = editor.getMarkdown();
+    });
 
-        // Basic form validation for required fields
-        const templateName = document.getElementById('template_name').value.trim();
-        const category = document.getElementById('category').value;
-        const description = document.getElementById('description').value.trim();
-        const keywords = document.getElementById('keywords').value.trim();
-        const date = document.getElementById('date').value;
 
-        let valid = true;
+    // Copy metadata functionality
+       const copyCheckboxes = document.querySelectorAll('.copy-meta');
+       copyCheckboxes.forEach(checkbox => {
+           checkbox.addEventListener('change', function () {
+               const targetId = this.getAttribute('data-target');
+               const targetInput = document.getElementById(targetId);
+               if (this.checked) {
+                   switch (targetId) {
+                       case 'og_title':
+                           targetInput.value = document.getElementById('template_name').value; // Copy from Template Name
+                           break;
+                       case 'og_description':
+                           targetInput.value = document.getElementById('description').value; // Copy from Description
+                           break;
+                       case 'og_image':
+                           targetInput.value = document.getElementById('description').value; // Change this logic as needed
+                           break;
+                       case 'og_url':
+                           // Generate URL based on template name and category
+                           const category = document.getElementById('category').value;
+                           const templateName = document.getElementById('template_name').value;
+                           targetInput.value = `${templateName}-${category}`.replace(/\s+/g, '-').toLowerCase(); // Generates URL
+                           break;
+                       case 'json_ld_name':
+                           targetInput.value = document.getElementById('og_title').value; // Copy from OG Title
+                           break;
+                       case 'json_ld_description':
+                           targetInput.value = document.getElementById('og_description').value; // Copy from OG Description
+                           break;
+                       case 'json_ld_url':
+                           targetInput.value = document.getElementById('og_url').value; // Copy from OG URL
+                           break;
+                   }
+               } else {
+                   targetInput.value = ''; // Clear the input if checkbox is unchecked
+               }
+           });
+       });
 
-        // Simple validation for required fields
-        if (!templateName || category === 'none' || !description || !keywords || !date || !editorContent) {
-            alert("Please fill all required fields.");
-            valid = false;
-        }
+       // Copy metadata function for URL generation
+       const copyMetaData = (targetFieldId) => {
+           const templateName = document.getElementById('template_name').value;
+           const category = document.getElementById('category').value;
+           const subcategory = document.getElementById('subcategory').value;
+           let url = `http://lifeisacanvas24.github.io/blog/${category}`;
 
-        return valid; // Proceed with submission if valid
-    };
+           // Include subcategory if selected
+           if (subcategory && subcategory !== "none") {
+               url += `/${subcategory}`;
+           }
+
+           // Append the generated slug from template name
+           const slug = templateName.toLowerCase().replace(/\s+/g, '-');
+           url += `/${slug}/`;
+
+           const targetField = document.getElementById(targetFieldId);
+           targetField.value = url; // Copying the generated URL to the target field
+           targetField.disabled = true; // Disable the input field
+       };
+
+       // Event listeners for URL generation checkboxes
+       document.querySelectorAll('.copy-meta').forEach(checkbox => {
+           checkbox.addEventListener('change', (event) => {
+               const targetFieldId = event.target.getAttribute('data-target');
+               if (event.target.checked) {
+                   if (targetFieldId === 'og_url' || targetFieldId === 'json_ld_url') {
+                       copyMetaData(targetFieldId); // Generate URL for specific fields
+                   } else {
+                       const targetField = document.getElementById(targetFieldId);
+                       targetField.disabled = true; // Disable the input field
+                   }
+               } else {
+                   const targetField = document.getElementById(targetFieldId);
+                   targetField.disabled = false; // Enable the input field if unchecked
+               }
+           });
+       });
 
     // Subcategories Data
     const subcategories = {
@@ -257,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for category changes
     document.getElementById('category').addEventListener('change', updateSubcategories);
     updateSubcategories();  // Initialize subcategories on page load
+
 });
 </script>
 {% endblock %}

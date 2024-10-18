@@ -69,3 +69,37 @@
 .icon i {
     color: #3273dc;
 }
+
+<style>
+.accordion {
+    border: 1px solid #ddd; /* Border around the accordion */
+    border-radius: 5px; /* Rounded corners */
+    margin-bottom: 1rem; /* Space between accordions */
+}
+
+.accordion-header {
+    background-color: #f7f7f7; /* Header background color */
+    padding: 1rem; /* Padding inside the header */
+    cursor: pointer; /* Cursor change to indicate clickable */
+    position: relative; /* For positioning the arrow */
+}
+
+.accordion-button::after {
+    content: ""; /* Arrow */
+    border: solid transparent; /* Arrow styling */
+    border-width: 5px 5px 0 5px;
+    border-top-color: #333; /* Arrow color */
+    position: absolute; /* Position the arrow */
+    right: 1rem; /* Align to the right */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%) rotate(0deg); /* Rotate arrow for open/closed state */
+    transition: transform 0.2s ease; /* Smooth transition for rotation */
+}
+
+.accordion-content {
+    padding: 1rem; /* Padding for content area */
+}
+
+.accordion-header.active .accordion-button::after {
+    transform: translateY(-50%) rotate(180deg); /* Rotate arrow when active */
+}

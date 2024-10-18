@@ -690,9 +690,10 @@ type = "{og_type or ''}"
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-    return RedirectResponse(
-    url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory)}",
-    status_code=302)
+        return RedirectResponse(
+    url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
+    status_code=302
+)
 
 @app.get("/new-post-added/", response_class=HTMLResponse)
 async def new_post_added(
