@@ -1,18 +1,22 @@
 <!-- templates/header.html -->
 <header class="navbar">
     <div class="navbar-brand">
+        <!-- Logo of the web app
         <a class="navbar-item" href="/">
-            Admin Home
+            <img src="path/to/your/logo.png" alt="Logo" />
         </a>
+-->
+        <!-- Burger menu icon -->
         <span id="navbar-burger" class="navbar-burger burger" data-target="navbar-menu">
             <span></span>
             <span></span>
             <span></span>
         </span>
     </div>
+
     <div id="navbar-menu" class="navbar-menu">
         <div class="navbar-start">
-            <a class="navbar-item" href="/">Home</a>
+            <a class="navbar-item" href="/login/">Admin Login</a>
         </div>
         <div class="navbar-end">
             {% if user %}
