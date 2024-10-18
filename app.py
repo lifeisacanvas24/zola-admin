@@ -64,13 +64,27 @@ def get_db_connection():
     return conn
 
 # Helper function to get the logged-in user
+# def get_logged_in_user(request: Request):
+    # user_id = request.session.get('user_id')
+    # if not user_id:
+        # return None
+    # with get_db_connection() as conn:
+        # user = conn.execute('SELECT * FROM users WHERE userid = ?', (user_id,)).fetchone()
+    # return user
+
+# Helper function to get the logged-in user
 def get_logged_in_user(request: Request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        return None
-    with get_db_connection() as conn:
-        user = conn.execute('SELECT * FROM users WHERE userid = ?', (user_id,)).fetchone()
-    return user
+    user_id = get_current_user_id_from_session(request)
+
+    if user_id:
+        with get_db_connection() as conn:
+            # Remove 'role' from the selection
+            user = conn.execute('SELECT userid, username FROM users WHERE userid = ?', (user_id,)).fetchone()
+            return user  # Now this only returns userid and username
+    return None
+
+def get_current_user_id_from_session(request: Request):
+    return request.session.get("user_id")
 
 # Helper function to hash the password
 def hash_password(password: str) -> str:
@@ -105,15 +119,15 @@ async def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login/")
-async def login_post(request: Request, username: str = Form(...), password: str = Form(...)):
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
     with get_db_connection() as conn:
-        user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        user = conn.execute('SELECT userid, username, password FROM users WHERE username = ?', (username,)).fetchone()
 
-    if user and verify_password(password, user['password']):
-        request.session['user_id'] = user['userid']
+    if user and verify_password(password, user["password"]):  # Use your verify function
+        request.session["user_id"] = user["userid"]  # Store user ID in session
         return RedirectResponse(url="/dashboard/", status_code=303)
 
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @app.get("/logout/")
 async def logout(request: Request):
@@ -173,7 +187,7 @@ async def modify_user_post(request: Request, userid: int, username: str = Form(.
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
-    hashed_password = hash_password(password)
+    hashed_password = hash_password(password)  # Use your hash function
 
     with get_db_connection() as conn:
         conn.execute('UPDATE users SET username = ?, password = ? WHERE userid = ?', (username, hashed_password, userid))
