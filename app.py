@@ -675,12 +675,24 @@ type = "{og_type or ''}"
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-    return RedirectResponse(url="/new-post-added/", status_code=302)
+    return RedirectResponse(
+    url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory)}",
+    status_code=302)
 
-@app.get("/add-new-post/", response_class=HTMLResponse)
-async def new_post_added(request: Request):
+@app.get("/new-post-added/", response_class=HTMLResponse)
+async def new_post_added(
+    request: Request,
+    template_name: str,
+    category: str,
+    subcategory: Optional[str] = None
+):
     user = get_logged_in_user(request)
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
-    return templates.TemplateResponse("success.html", {"request": request})
+    return templates.TemplateResponse("new_post_added.html", {
+        "request": request,
+        "template_name": template_name,
+        "category": category,
+        "subcategory": subcategory or "none",  # Handle if subcategory is None
+    })
