@@ -300,7 +300,7 @@ def parse_front_matter(markdown_content):
         return front_matter, content
     return "", markdown_content  # No front matter found
 
-@app.get("/markdown/", response_class=HTMLResponse)
+@app.get("/list-posts/", response_class=HTMLResponse)
 async def get_markdown_files(request: Request, page: int = 1, section: str = None):
     user = get_logged_in_user(request)
 
@@ -315,7 +315,7 @@ async def get_markdown_files(request: Request, page: int = 1, section: str = Non
     total_pages = (total_files + 19) // 20  # Round up for total pages
 
     # Render the template with the necessary context
-    return templates.TemplateResponse("markdown_list.html", {
+    return templates.TemplateResponse("list_posts.html", {
         "request": request,
         "markdown_files": markdown_files_list,
         "user": user,
@@ -466,7 +466,7 @@ async def delete_markdown_file(request: Request, full_path: str):
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the deletion to the repository.")
 
-    return RedirectResponse(url="/markdown/", status_code=303)
+    return RedirectResponse(url="/list-posts/", status_code=303)
 
 @app.get("/templates/", response_class=HTMLResponse)
 async def templates_index(request: Request):
