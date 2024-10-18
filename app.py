@@ -2,6 +2,7 @@ import logging
 import os
 import sqlite3
 from datetime import datetime  # <-- Add this import
+from typing import Optional  # Add this import
 from urllib.parse import quote
 
 from dotenv import load_dotenv
