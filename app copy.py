@@ -1,9 +1,10 @@
-#app.py
-mport logging
+import json
+import logging
 import os
+import re
 import sqlite3
 from datetime import datetime  # <-- Add this import
-from typing import Optional  # Add this import
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import quote
 
 from dotenv import load_dotenv
@@ -18,11 +19,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
 from git_helper import add_file, list_files, remove_file
-
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-logging.basicConfig(level=logging.INFO)
-
 
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -64,7 +60,16 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Database connection
-def get_db_connection():
+def get_db_connection() -> sqlite3.Connection:
+    """Establish a connection to the SQLite database.
+
+    Returns:
+        sqlite3.Connection: A connection object to the SQLite database.
+
+    """
+    conn = sqlite3.connect('zolanew_admin.db')
+    conn.row_factory = sqlite3.Row
+    return conn
     conn = sqlite3.connect('zolanew_admin.db')
     conn.row_factory = sqlite3.Row
     return conn
@@ -89,6 +94,101 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     return pbkdf2_sha256.verify(password, hashed_password)
+
+##For Parsing front matter info.
+def parse_front_matter(content: str) -> Tuple[Dict[str, Any], str]:
+    if not content:
+        return {}, ""
+
+    parts = content.split('+++', 2)
+    if len(parts) < 3:
+        return {}, content
+
+    front_matter_raw = parts[1].strip()
+    post_content = parts[2].strip()
+
+    # Parse front_matter_raw into a dictionary using your parse_block and other helper functions
+    front_matter = {}
+    current_section = front_matter
+
+    for line in front_matter_raw.split('\n'):
+        line = line.strip()
+        if line.startswith('[') and line.endswith(']'):
+            section = line[1:-1]
+            front_matter[section] = {}
+            current_section = front_matter[section]
+        else:
+            parsed = parse_block(line)
+            current_section.update(parsed)
+
+    # Handle json_ld data if it exists
+    if 'json_ld' in front_matter:
+        front_matter['json_ld'] = parse_json_ld(front_matter['json_ld'])
+
+    return front_matter, post_content
+
+def parse_json_ld(json_ld_data):
+        result = {}
+        for key, value in json_ld_data.items():
+            if key == 'itemprop':
+                for item in value.strip('[]').split('},'):
+                    item = item.strip().strip('{').strip('}')
+                    if ':' in item:
+                        k, v = item.split(':', 1)
+                        result[k.strip()] = v.strip().strip('"')
+            else:
+                result[key] = value
+        return result
+
+def parse_value(value: str) -> Any:
+        value = value.strip()
+        if value.startswith('"') and value.endswith('"'):
+            return value[1:-1]
+        if value.lower() == 'true':
+            return True
+        if value.lower() == 'false':
+            return False
+        if value.startswith('[') and value.endswith(']'):
+            return [parse_value(v.strip()) for v in value[1:-1].split(',')]
+        return value
+
+def parse_block(block: str) -> Dict[str, Any]:
+        result = {}
+        current_key = None
+        current_value = []
+        for line in block.split('\n'):
+            line = line.strip()
+            if '=' in line:
+                if current_key:
+                    result[current_key] = parse_value(' '.join(current_value))
+                key, value = line.split('=', 1)
+                current_key = key.strip()
+                current_value = [value.strip()]
+            elif line.startswith('{') and line.endswith('}'):
+                item = {}
+                for match in re.finditer(r'(\w+)\s*=\s*"([^"]*)"', line):
+                    item[match.group(1)] = match.group(2)
+                current_value.append(item)
+            elif line:
+                current_value.append(line)
+        if current_key:
+            result[current_key] = parse_value(' '.join(current_value))
+        return result
+
+        front_matter = {}
+        current_section = front_matter
+        for line in front_matter_raw.split('\n'):
+            line = line.strip()
+        if line.startswith('[') and line.endswith(']'):
+            section = line[1:-1]
+            front_matter[section] = {}
+            current_section = front_matter[section]
+        else:
+            parsed = parse_block(line)
+            current_section.update(parsed)
+        if 'json_ld' in front_matter:
+                   front_matter['json_ld'] = parse_json_ld(front_matter['json_ld'])
+        return front_matter, post_content
 
 # Define the custom filter for URL encoding
 def url_encode(s):
@@ -288,14 +388,6 @@ def list_markdown_files(page: int = 1, limit: int = 20, section: str = None):
         return [], 0
 
 
-def parse_front_matter(markdown_content):
-    # Simple parser for front matter (adjust as needed)
-    if markdown_content.startswith('+++'):
-        parts = markdown_content.split('+++')[1:]
-        front_matter = parts[0].strip()  # Extract front matter
-        content = ''.join(parts[1:]).strip()  # Remaining content
-        return front_matter, content
-    return "", markdown_content  # No front matter found
 
 @app.get("/list-posts/", response_class=HTMLResponse)
 async def get_markdown_files(request: Request, page: int = 1, section: str = None):
@@ -407,9 +499,9 @@ async def edit_markdown_post(
             logging.error(f"Git operation failed: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-        return RedirectResponse(url="/markdown/", status_code=303)
+        return RedirectResponse(url="/list-posts/", status_code=303)
 
-@app.post("/markdown/delete/{full_path:path}")
+@app.post("/delete-post/{full_path:path}")
 async def delete_markdown_file(request: Request, full_path: str):
     user = get_logged_in_user(request)
     if not user:
@@ -586,144 +678,145 @@ async def delete_template(request: Request, template_name: str):
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
     return RedirectResponse(url="/templates/", status_code=303)
-
+''''
 @app.get("/add-new-post/", response_class=HTMLResponse)
-async def new_post(request: Request):
+async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
     user = get_logged_in_user(request)
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
     return templates.TemplateResponse("new_post.html", {"request": request, "user": user})
+'''
+@app.get("/add-new-post/", response_class=HTMLResponse)
+async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
+    user = get_logged_in_user(request)
+    if not user:
+        return RedirectResponse(url="/login/", status_code=303)
 
-# Define the Pydantic model for new posts
-class NewPost(BaseModel):
-    template_name: str
-    category: str
-    subcategory: Optional[str] = None
-    description: str
-    draft: Optional[bool] = False
-    content: str
-    date: Optional[str] = None  # Optional date field
+    is_edit = file_name is not None
+    template_data = {
+        "template_name": "",
+        "category": category or "",
+        "subcategory": subcategory or "",
+        "description": "",
+        "keywords": "",
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "draft": False,
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "og_url": "",
+        "og_type": "",
+        "author": user["username"],
+        "json_ld_name": "",
+        "json_ld_description": "",
+        "json_ld_url": "",
+        "content": "",
+        "is_edit": is_edit,
+        "original_file_name": file_name,
+    }
+
+    if is_edit:
+        post_path = os.path.join(BLOG_CONTENT_PATH, category or '', subcategory or '', file_name or '')
+    if not os.path.exists(post_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        with open(post_path, encoding='utf-8') as f:
+            content = f.read()
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        content = ""
+
+        front_matter, post_content = parse_front_matter(content)
+
+        escaped_content = json.dumps(post_content)
+
+        print("Front matter:", front_matter)  # Debug log
+
+        template_data.update({
+                "template_name": front_matter.get("title", ""),
+                "description": front_matter.get("description", ""),
+                "keywords": ", ".join(front_matter.get("keywords", [])),
+                "date": front_matter.get("date", ""),
+                "draft": front_matter.get("draft", False),
+                "og_title": front_matter.get("extra", {}).get("og_title", ""),
+                "og_description": front_matter.get("extra", {}).get("og_description", ""),
+                "og_image": front_matter.get("extra", {}).get("og_image", ""),
+                "og_url": front_matter.get("extra", {}).get("og_url", ""),
+                "og_type": front_matter.get("extra", {}).get("og_type", ""),
+                "author": front_matter.get("author", user["username"]),
+                "json_ld_name": front_matter.get("json_ld", {}).get("name", ""),
+                "json_ld_description": front_matter.get("json_ld", {}).get("description", ""),
+                "json_ld_url": front_matter.get("json_ld", {}).get("url", ""),
+                "content": escaped_content,
+            })
+
+    return templates.TemplateResponse("new_post.html", {**template_data, "request": request})
 
 @app.post("/add-new-post/")
 async def add_new_post(
     request: Request,
     template_name: str = Form(...),
     category: str = Form(...),
-    subcategory: str = Form(None),  # Subcategory is optional
+    subcategory: Optional[str] = Form(None),
     description: str = Form(...),
     keywords: str = Form(...),
-    date: str = Form(None),  # Optional, auto-generate if not provided
-    draft: bool = Form(False),  # Draft should not be mandatory
-    og_title: str = Form(None),  # Optional OG metadata fields
-    og_description: str = Form(None),
-    og_image: str = Form(None),
-    og_url: str = Form(None),
-    og_type: str = Form(None),
+    date: str = Form(...),
+    draft: bool = Form(False),
+    og_title: Optional[str] = Form(None),
+    og_description: Optional[str] = Form(None),
+    og_image: Optional[str] = Form(None),
+    og_url: Optional[str] = Form(None),
+    og_type: Optional[str] = Form(None),
     author: str = Form(...),
-    viewport: str = Form(None),
-    json_ld_name: str = Form(None),
-    json_ld_description: str = Form(None),
-    json_ld_url: str = Form(None),
+    json_ld_name: Optional[str] = Form(None),
+    json_ld_description: Optional[str] = Form(None),
+    json_ld_url: Optional[str] = Form(None),
     content: str = Form(...),
-    db: Session = Depends(get_db),  # Using synchronous session
+    is_edit: bool = Form(False),
+    original_file_name: Optional[str] = Form(None)
 ):
-    subcategory_path = subcategory if subcategory else ""
-
-    # Handling date - default to now if not provided
-    post_date = date if date else datetime.now().isoformat()
-
-    # Prepare Open Graph metadata (with default values)
-    og_title = og_title if og_title else template_name
-    og_description = og_description if og_description else description
-    og_image = og_image if og_image else "default_image_url.png"
-    og_url = og_url if og_url else f"http://yourwebsite.com/blog/{category}/{subcategory}/{template_name.replace(' ', '-').lower()}.md"
-    og_type = og_type if og_type else "article"
-
-    # Prepare front matter
-    front_matter = f"""+++
+    post_content = f"""+++
 title = "{template_name}"
 description = "{description}"
-date = "{post_date}"
+keywords = {keywords.split(', ')}
+date = "{date}"
 draft = {str(draft).lower()}
-updated = "{datetime.now().isoformat()}"
-reading_time = "N/A"
-social_image = "{og_image}"
-tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
-categories = ["{category}", "{subcategory_path}"]
+author = "{author}"
+
+[extra]
+og_title = "{og_title or ''}"
+og_description = "{og_description or ''}"
+og_image = "{og_image or ''}"
+og_url = "{og_url or ''}"
+og_type = "{og_type or ''}"
+
+[json_ld]
+name = "{json_ld_name or ''}"
+description = "{json_ld_description or ''}"
+url = "{json_ld_url or ''}"
 +++
+
+{content}
 """
 
-    # Handle Open Graph metadata
-    front_matter += f"""
-[open_graph]
-title = "{og_title}"
-description = "{og_description}"
-image = "{og_image}"
-url = "{og_url}"
-type = "{og_type}"
-"""
+    file_name = original_file_name if is_edit else f"{template_name.lower().replace(' ', '-')}.md"
+    file_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory or '', file_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # Prepare JSON-LD data (Optional)
-    json_ld_metadata = ""
-    if json_ld_name or json_ld_description or json_ld_url:
-        json_ld_metadata = f"""
-<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "name": "{json_ld_name or ''}",
-  "description": "{json_ld_description or ''}",
-  "url": "{json_ld_url or ''}",
-  "author": "{author}",
-  "datePublished": "{post_date}"
-}}
-</script>
-"""
+    with open(file_path, 'w') as f:
+        f.write(post_content)
 
-    # Generate file path
-    template_file_name = f"{template_name.replace(' ', '-').lower()}.md"
-    template_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory_path, template_file_name)
-
-    # Write content to file (front matter + content + JSON-LD)
-    try:
-        os.makedirs(os.path.dirname(template_path), exist_ok=True)
-        with open(template_path, 'w') as f:
-            f.write(front_matter + "\n" + content + "\n" + json_ld_metadata)
-    except OSError as e:
-        logging.error(f"Error writing to file: {template_path}, {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create the template file.")
-
-    # Handle Git operations
-    try:
-        repo = Repo("GIT_REPO_PATH")  # Adjust the path as needed
-        repo.git.add(template_path)
-        repo.index.commit(f"Add new post: {template_name}")
-        origin = repo.remote(name="origin")
-        origin.push()
-    except Exception as e:
-        logging.error(f"Git operation failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
+    # Git operations
+    repo = Repo(GIT_REPO_PATH)
+    repo.git.add(file_path)
+    commit_message = f"Update post: {template_name}" if is_edit else f"Add new post: {template_name}"
+    repo.index.commit(commit_message)
+    origin = repo.remote(name='origin')
+    origin.push()
 
     return RedirectResponse(
         url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
         status_code=302
-    )
-
-@app.get("/new-post-added/", response_class=HTMLResponse)
-async def new_post_added(
-    request: Request,
-    template_name: str,
-    category: str,
-    subcategory: Optional[str] = None
-):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
-
-    return templates.TemplateResponse("new_post_added.html", {
-        "request": request,
-        "template_name": template_name,
-        "category": category,
-        "subcategory": subcategory or "none",  # Handle if subcategory is None
-    })
+        )

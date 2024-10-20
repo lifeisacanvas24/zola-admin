@@ -2,9 +2,10 @@ import logging
 import os
 import sqlite3
 from datetime import datetime  # <-- Add this import
-from typing import Optional  # Add this import
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import quote
 
+import toml
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,8 +16,6 @@ from git import Repo
 from passlib.hash import pbkdf2_sha256
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
-
-from git_helper import add_file, list_files, remove_file
 
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -58,19 +57,19 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Database connection
-def get_db_connection():
+def get_db_connection() -> sqlite3.Connection:
+    """Establish a connection to the SQLite database.
+
+    Returns:
+        sqlite3.Connection: A connection object to the SQLite database.
+
+    """
     conn = sqlite3.connect('zolanew_admin.db')
     conn.row_factory = sqlite3.Row
     return conn
-
-# Helper function to get the logged-in user
-# def get_logged_in_user(request: Request):
-    # user_id = request.session.get('user_id')
-    # if not user_id:
-        # return None
-    # with get_db_connection() as conn:
-        # user = conn.execute('SELECT * FROM users WHERE userid = ?', (user_id,)).fetchone()
-    # return user
+    conn = sqlite3.connect('zolanew_admin.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # Helper function to get the logged-in user
 def get_logged_in_user(request: Request):
@@ -92,6 +91,105 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed_password: str) -> bool:
     return pbkdf2_sha256.verify(password, hashed_password)
+
+##For Parsing front matter info.
+def parse_front_matter(content: str) -> Tuple[Dict[str, Any], str]:
+    """Parses the front matter and post content from the given markdown string.
+
+    Args:
+        content (str): The markdown content with front matter.
+
+    Returns:
+        Tuple[Dict[str, Any], str]: A tuple containing the parsed front matter as a dictionary
+                                      and the post content as a string.
+
+    """
+    if not content:
+        return {}, ""
+
+    parts = content.split('+++', 2)
+    if len(parts) < 3:
+        return {}, content.strip()
+
+    front_matter_raw = parts[1].strip()
+    post_content = parts[2].strip()
+
+    try:
+        front_matter = toml.loads(front_matter_raw)
+    except toml.TomlDecodeError as e:
+        print(f"Error parsing TOML: {e}")
+        front_matter = {}
+
+    # Parse JSON-LD if it exists in the front matter
+    if 'json_ld' in front_matter:
+        front_matter['json_ld'] = parse_json_ld(front_matter['json_ld'])
+
+    return front_matter, post_content
+
+def parse_json_ld(json_ld_data: Any) -> Dict[str, Any]:
+    """Parses JSON-LD data into a structured dictionary.
+
+    Args:
+        json_ld_data (Any): The JSON-LD data to be parsed.
+
+    Returns:
+        Dict[str, Any]: The parsed JSON-LD data as a dictionary.
+
+    """
+    # Assuming json_ld_data is a dict or similar structure
+    result = {}
+    if isinstance(json_ld_data, dict):
+        for key, value in json_ld_data.items():
+            result[key] = value.strip() if isinstance(value, str) else value
+    return result
+
+def parse_value(value: str) -> Any:
+    """Parses a string value into its corresponding Python type.
+
+    Args:
+        value (str): The string value to parse.
+
+    Returns:
+        Any: The parsed value.
+
+    """
+    value = value.strip()
+    if value.startswith('"') and value.endswith('"'):
+        return value[1:-1]
+    if value.lower() == 'true':
+        return True
+    if value.lower() == 'false':
+        return False
+    if value.startswith('[') and value.endswith(']'):
+        return [parse_value(v.strip()) for v in value[1:-1].split(',')]
+    return value
+
+def parse_block(block: str) -> Dict[str, Any]:
+    """Parses a block of key-value pairs into a dictionary.
+
+    Args:
+        block (str): The block of text to parse.
+
+    Returns:
+        Dict[str, Any]: The parsed key-value pairs as a dictionary.
+
+    """
+    result = {}
+    current_key = None
+    current_value = []
+    for line in block.split('\n'):
+        line = line.strip()
+        if '=' in line:
+            if current_key:
+                result[current_key] = parse_value(' '.join(current_value))
+            key, value = line.split('=', 1)
+            current_key = key.strip()
+            current_value = [value.strip()]
+        elif line:
+            current_value.append(line)
+    if current_key:
+        result[current_key] = parse_value(' '.join(current_value))
+    return result
 
 # Define the custom filter for URL encoding
 def url_encode(s):
@@ -205,41 +303,6 @@ async def delete_user(request: Request, userid: int):
         conn.commit()
     return RedirectResponse(url="/users/", status_code=303)
 
-# Git file management routes
-
-@app.get("/admin/blog/git/files/", response_class=HTMLResponse)
-async def list_git_files(request: Request):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
-
-    files = list_files()
-    return templates.TemplateResponse("git_files.html", {"request": request, "files": files, "user": user})
-
-@app.post("/admin/blog/git/add-file/")
-async def add_git_file(request: Request, file_path: str = Form(...)):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
-
-    try:
-        add_file(file_path)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    return RedirectResponse(url="/admin/blog/git/files/", status_code=303)
-
-@app.post("/admin/blog/git/remove-file/")
-async def remove_git_file(request: Request, file_path: str = Form(...)):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
-
-    try:
-        remove_file(file_path)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    return RedirectResponse(url="/admin/blog/git/files/", status_code=303)
-
 # Template management routes
 def list_html_templates():
     template_dir = TEMPLATE_DIR
@@ -291,14 +354,6 @@ def list_markdown_files(page: int = 1, limit: int = 20, section: str = None):
         return [], 0
 
 
-def parse_front_matter(markdown_content):
-    # Simple parser for front matter (adjust as needed)
-    if markdown_content.startswith('+++'):
-        parts = markdown_content.split('+++')[1:]
-        front_matter = parts[0].strip()  # Extract front matter
-        content = ''.join(parts[1:]).strip()  # Remaining content
-        return front_matter, content
-    return "", markdown_content  # No front matter found
 
 @app.get("/list-posts/", response_class=HTMLResponse)
 async def get_markdown_files(request: Request, page: int = 1, section: str = None):
@@ -410,30 +465,24 @@ async def edit_markdown_post(
             logging.error(f"Git operation failed: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-        return RedirectResponse(url="/markdown/", status_code=303)
+        return RedirectResponse(url="/list-posts/", status_code=303)
 
-@app.post("/markdown/delete/{full_path:path}")
-async def delete_markdown_file(request: Request, full_path: str):
+@app.post("/delete-post/{category}/{file_name}")
+@app.post("/delete-post/{category}/{subcategory:path}/{file_name}")
+async def delete_blog_post(request: Request, category: str, file_name: str, subcategory: Optional[str] = None):
+
     user = get_logged_in_user(request)
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
-    # Log the incoming parameters
-    logging.info(f"Delete request for path: {full_path}")
-
-    # Split the full path into parts
-    path_parts = full_path.split('/')
-    category = path_parts[0]
-    file_name = path_parts[-1]
-    subcategory = '/'.join(path_parts[1:-1]) if len(path_parts) > 2 else None
-
-    logging.info(f"Parsed path - category: {category}, subcategory: {subcategory}, file_name: {file_name}")
-
-    # Construct the file path
+    # Construct the full path for deletion
+    subcategory_path = subcategory if subcategory else ''
+    full_path = os.path.join(category, subcategory_path, file_name)
     file_path = os.path.join(BLOG_CONTENT_PATH, full_path)
-    logging.info(f"Constructed file path: {file_path}")
 
-    if not os.path.exists(file_path):
+    logging.info(f"Constructed file path for deletion: {file_path}")
+
+    if not os.path.isfile(file_path):
         logging.error(f"File not found: {file_path}")
         raise HTTPException(status_code=404, detail="File not found")
 
@@ -450,18 +499,16 @@ async def delete_markdown_file(request: Request, full_path: str):
     try:
         os.remove(file_path)
         logging.info(f"File successfully deleted: {file_path}")
+
+        # Commit and push the deletion to Git
+        repo.git.add(file_path)  # Stage the deletion
+        repo.index.commit(f"Delete file: {full_path}")  # Commit the deletion
+        repo.git.push('origin', 'master')  # Push changes to the remote
+        logging.info(f"Git operations successful for deleting: {full_path}")
+
     except OSError as e:
         logging.error(f"Error deleting file: {file_path}, {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to delete the file.")
-
-    # Commit and push the deletion to Git
-    try:
-        repo.git.add(file_path)  # Stage the deletion
-        repo.index.commit(f"Delete file: {full_path}")  # Commit the deletion
-        push_result = repo.git.push('origin', 'master', '--verbose')  # Push changes to the remote
-
-        logging.info(f"Git operations successful for deleting: {full_path}")
-
     except Exception as e:
         logging.error(f"Git operation failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to commit and push the deletion to the repository.")
@@ -589,102 +636,158 @@ async def delete_template(request: Request, template_name: str):
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
     return RedirectResponse(url="/templates/", status_code=303)
-
+''''
 @app.get("/add-new-post/", response_class=HTMLResponse)
-async def new_post(request: Request):
+async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
     user = get_logged_in_user(request)
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
     return templates.TemplateResponse("new_post.html", {"request": request, "user": user})
+'''
+@app.get("/add-new-post/", response_class=HTMLResponse)
+async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
+    user = get_logged_in_user(request)
+    if not user:
+        return RedirectResponse(url="/login/", status_code=303)
+
+    is_edit = file_name is not None
+    template_data = {
+        "template_name": "",
+        "category": category or "",
+        "subcategory": subcategory or "",
+        "description": "",
+        "keywords": "",
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "draft": False,
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "og_url": "",
+        "og_type": "",
+        "author": user["username"],
+        "json_ld_name": "",
+        "json_ld_description": "",
+        "json_ld_url": "",
+        "content": "",
+        "is_edit": is_edit,
+        "original_file_name": file_name,
+    }
+
+    if is_edit:
+        post_path = os.path.join(BLOG_CONTENT_PATH, category or '', subcategory or '', file_name or '')
+        if not os.path.exists(post_path):
+            raise HTTPException(status_code=404, detail="File not found")
+
+        try:
+            with open(post_path, encoding='utf-8') as f:
+                content = f.read()
+        except Exception as e:
+            print(f"Error reading file: {e}")
+            content = ""
+
+        front_matter, post_content = parse_front_matter(content)
+
+        template_data.update({
+            "template_name": front_matter.get("title", ""),
+            "description": front_matter.get("description", ""),
+            "keywords": ", ".join(front_matter.get("keywords", [])),
+            "date": front_matter.get("date", ""),
+            "draft": front_matter.get("draft", False),
+            "og_title": front_matter.get("extra", {}).get("og_title", ""),
+            "og_description": front_matter.get("extra", {}).get("og_description", ""),
+            "og_image": front_matter.get("extra", {}).get("og_image", ""),
+            "og_url": front_matter.get("extra", {}).get("og_url", ""),
+            "og_type": front_matter.get("extra", {}).get("og_type", ""),
+            "author": front_matter.get("author", user["username"]),
+            "json_ld_name": front_matter.get("json_ld", {}).get("name", ""),
+            "json_ld_description": front_matter.get("json_ld", {}).get("description", ""),
+            "json_ld_url": front_matter.get("json_ld", {}).get("url", ""),
+            "content": post_content,  # No need to escape here
+        })
+
+    return templates.TemplateResponse("new_post.html", {**template_data, "request": request})
 
 @app.post("/add-new-post/")
 async def add_new_post(
     request: Request,
     template_name: str = Form(...),
     category: str = Form(...),
-    subcategory: str = Form(None),  # Subcategory is optional
+    subcategory: Optional[str] = Form(None),
     description: str = Form(...),
     keywords: str = Form(...),
-    date: str = Form(None),  # Optional, auto-generate if not provided
-    draft: bool = Form(False),  # Draft should not be mandatory
-    og_title: str = Form(None),  # Optional OG metadata fields
-    og_description: str = Form(None),
-    og_image: str = Form(None),
-    og_url: str = Form(None),
-    og_type: str = Form(None),
+    date: str = Form(...),
+    draft: bool = Form(False),
+    og_title: Optional[str] = Form(None),
+    og_description: Optional[str] = Form(None),
+    og_image: Optional[str] = Form(None),
+    og_url: Optional[str] = Form(None),
+    og_type: Optional[str] = Form(None),
     author: str = Form(...),
-    viewport: str = Form(None),
-    json_ld_name: str = Form(None),
-    json_ld_description: str = Form(None),
-    json_ld_url: str = Form(None),
+    json_ld_name: Optional[str] = Form(None),
+    json_ld_description: Optional[str] = Form(None),
+    json_ld_url: Optional[str] = Form(None),
     content: str = Form(...),
+    is_edit: bool = Form(False),
+    original_file_name: Optional[str] = Form(None)
 ):
-    subcategory_path = subcategory if subcategory else ""
 
-    # Handling date - default to now if not provided
-    post_date = date if date else datetime.now().isoformat()
 
     # Prepare front matter
     front_matter = f"""+++
-title = "{template_name}"
-description = "{description}"
-keywords = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
-date = "{post_date}"
-draft = {str(draft).lower()}
+    title = "{template_name}"
+    description = "{description}"
+    date = "{date}"
+    author = "[{author}]"
+    draft = {str(draft).lower()}
+    updated = "{datetime.now().isoformat()}"
+    reading_time = "N/A"
+    social_image = "{og_image or ''}"
+    tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
+    categories = ["{category}", "{subcategory}"]
+    """
 
-[extra]
-og_title = "{og_title or ''}"
-og_description = "{og_description or ''}"
-og_image = "{og_image or ''}"
-og_url = "{og_url or ''}"
-og_type = "{og_type or ''}"
+    front_matter += f"""
+    [extra]
+    og_title = "{og_title or ''}"
+    og_description = "{og_description or ''}"
+    og_image = "{og_image or ''}"
+    og_url = "{og_url or ''}"
+    og_type = "{og_type or ''}"
 
-[custom]
-additional_meta_tags = [
-    {{ name = "author", content = "{author}" }},
-    {{ name = "viewport", content = "{viewport or ''}" }}
-]
+    [json_ld]
+    type = "BlogPosting"
+    context = "https://schema.org"
+    itemprop = [
+        {{ name = "{json_ld_name or ''}" }},
+        {{ description = "{json_ld_description or ''}" }},
+        {{ url = "{json_ld_url or ''}" }},
+        {{ author = "{author}" }},
+        {{ datePublished = "{date}" }}
+    ]
+    +++
+    """
+    post_content = front_matter + "\n" + content  # Corrected variable name from front_mater to front_matter
 
-[json_ld]
-type = "WebPage"
-context = "https://schema.org"
-itemprop = [
-    {{ name = "{json_ld_name or ''}" }},
-    {{ description = "{json_ld_description or ''}" }},
-    {{ url = "{json_ld_url or ''}" }}
-]
-+++
-"""
+    file_name = original_file_name if is_edit else f"{template_name.lower().replace(' ', '-')}.md"
+    file_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory or '', file_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-    # Generate file path
-    template_file_name = f"{template_name.replace(' ', '-').lower()}.md"
-    template_path = os.path.join(BLOG_CONTENT_PATH, category, subcategory_path, template_file_name)
+    with open(file_path, 'w') as f:
+        f.write(post_content)
 
-    # Write content to file (front matter + content)
-    try:
-        os.makedirs(os.path.dirname(template_path), exist_ok=True)
-        with open(template_path, 'w') as f:
-            f.write(front_matter + "\n" + content + "\n")
-    except OSError as e:
-        logging.error(f"Error writing to file: {template_path}, {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create the template file.")
-
-    # Handle Git operations
-    try:
-        repo = Repo(GIT_REPO_PATH)
-        repo.git.add(template_path)
-        repo.index.commit(f"Add new post: {template_name}")
-        origin = repo.remote(name="origin")
-        origin.push()
-    except Exception as e:
-        logging.error(f"Git operation failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
+    # Git operations
+    repo = Repo(GIT_REPO_PATH)
+    repo.git.add(file_path)
+    commit_message = f"Update post: {template_name}" if is_edit else f"Add new post: {template_name}"
+    repo.index.commit(commit_message)
+    origin = repo.remote(name='origin')
+    origin.push()
 
     return RedirectResponse(
         url=f"/new-post-added/?template_name={quote(template_name)}&category={quote(category)}&subcategory={quote(subcategory or '')}",
         status_code=302
-    )
+        )
 
 @app.get("/new-post-added/", response_class=HTMLResponse)
 async def new_post_added(

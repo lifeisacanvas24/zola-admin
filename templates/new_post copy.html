@@ -1,15 +1,25 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <section class="section">
     <div class="container">
         <h1 class="title">Create New Template</h1>
-        <form action="/add-new-post/" method="post" id="template-form" onsubmit="return validateForm()" novalidate>
+        <form
+            action="/add-new-post/"
+            method="post"
+            id="template-form"
+            onsubmit="return validateForm()"
+            novalidate
+        >
             <!-- Template Name -->
             <div class="field">
                 <label class="label" for="template_name">Template Name</label>
                 <div class="control">
-                    <input class="input" type="text" id="template_name" name="template_name" required>
+                    <input
+                        class="input"
+                        type="text"
+                        id="template_name"
+                        name="template_name"
+                        required
+                    />
                 </div>
             </div>
 
@@ -23,7 +33,9 @@
                             <option value="lifestyle">Lifestyle</option>
                             <option value="reviews">Reviews</option>
                             <option value="technology">Technology</option>
-                            <option value="random-thoughts">Random Thoughts</option>
+                            <option value="random-thoughts">
+                                Random Thoughts
+                            </option>
                             <option value="stock-market">Stock Market</option>
                         </select>
                     </div>
@@ -47,27 +59,47 @@
             <div class="field">
                 <label class="label" for="description">Description</label>
                 <div class="control">
-                    <input class="input" type="text" id="description" name="description" required>
+                    <input
+                        class="input"
+                        type="text"
+                        id="description"
+                        name="description"
+                        required
+                    />
                 </div>
             </div>
 
             <div class="field">
-                <label class="label" for="keywords">Keywords (comma-separated)</label>
+                <label class="label" for="keywords"
+                    >Keywords (comma-separated)</label
+                >
                 <div class="control">
-                    <input class="input" type="text" id="keywords" name="keywords" required>
+                    <input
+                        class="input"
+                        type="text"
+                        id="keywords"
+                        name="keywords"
+                        required
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="date">Date</label>
                 <div class="control">
-                    <input class="input" type="date" id="date" name="date" required>
+                    <input
+                        class="input"
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="checkbox">
-                    <input type="checkbox" id="draft" name="draft"> Draft
+                    <input type="checkbox" id="draft" name="draft" /> Draft
                 </label>
             </div>
 
@@ -76,35 +108,61 @@
             <div class="field">
                 <label class="label" for="og_title">OG Title</label>
                 <div class="control">
-                    <input class="input" type="text" id="og_title" name="og_title">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_title"
+                        name="og_title"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="og_description">OG Description</label>
                 <div class="control">
-                    <input class="input" type="text" id="og_description" name="og_description">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_description"
+                        name="og_description"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="og_image">OG Image Path</label>
                 <div class="control">
-                    <input class="input" type="text" id="og_image" name="og_image">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_image"
+                        name="og_image"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="og_url">OG URL</label>
                 <div class="control">
-                    <input class="input" type="text" id="og_url" name="og_url">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_url"
+                        name="og_url"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="og_type">OG Type</label>
                 <div class="control">
-                    <input class="input" type="text" id="og_type" name="og_type" value="article">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_type"
+                        name="og_type"
+                        value="article"
+                    />
                 </div>
             </div>
 
@@ -113,14 +171,25 @@
             <div class="field">
                 <label class="label" for="author">Author Name</label>
                 <div class="control">
-                    <input class="input" type="text" id="author" name="author">
+                    <input
+                        class="input"
+                        type="text"
+                        id="author"
+                        name="author"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="viewport">Viewport</label>
                 <div class="control">
-                    <input class="input" type="text" id="viewport" name="viewport" value="width=device-width, initial-scale=1">
+                    <input
+                        class="input"
+                        type="text"
+                        id="viewport"
+                        name="viewport"
+                        value="width=device-width, initial-scale=1"
+                    />
                 </div>
             </div>
 
@@ -129,21 +198,38 @@
             <div class="field">
                 <label class="label" for="json_ld_name">JSON-LD Name</label>
                 <div class="control">
-                    <input class="input" type="text" id="json_ld_name" name="json_ld_name">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_name"
+                        name="json_ld_name"
+                    />
                 </div>
             </div>
 
             <div class="field">
-                <label class="label" for="json_ld_description">JSON-LD Description</label>
+                <label class="label" for="json_ld_description"
+                    >JSON-LD Description</label
+                >
                 <div class="control">
-                    <input class="input" type="text" id="json_ld_description" name="json_ld_description">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_description"
+                        name="json_ld_description"
+                    />
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="json_ld_url">JSON-LD URL</label>
                 <div class="control">
-                    <input class="input" type="text" id="json_ld_url" name="json_ld_url">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_url"
+                        name="json_ld_url"
+                    />
                 </div>
             </div>
 
@@ -151,16 +237,26 @@
             <div class="field">
                 <label class="label">Content</label>
                 <div class="control">
-                    <div id="editor" style="min-height: 500px; border: 1px solid #ccc;"></div>
+                    <div
+                        id="editor"
+                        style="min-height: 500px; border: 1px solid #ccc"
+                    ></div>
                 </div>
             </div>
 
             <!-- Hidden Textarea for Editor Content -->
-            <textarea name="content" id="editor-content" style="height: 0; opacity: 0;" required></textarea>
+            <textarea
+                name="content"
+                id="editor-content"
+                style="height: 0; opacity: 0"
+                required
+            ></textarea>
 
             <div class="field">
                 <div class="control">
-                    <button class="button is-primary" type="submit">Create Template</button>
+                    <button class="button is-primary" type="submit">
+                        Create Template
+                    </button>
                 </div>
             </div>
         </form>
@@ -168,7 +264,10 @@
 </section>
 
 <!-- Toast UI Editor Core -->
-<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+<link
+    rel="stylesheet"
+    href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"
+/>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
 <!-- Toast UI Plugins -->
@@ -177,86 +276,120 @@
 <script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const Editor = toastui.Editor;
+    document.addEventListener("DOMContentLoaded", function () {
+        const Editor = toastui.Editor;
 
-    // Initialize Toast UI Editor
-    const editor = new Editor({
-        el: document.querySelector('#editor'),
-        height: '500px',
-        initialEditType: 'markdown',
-        previewStyle: 'vertical',
-        plugins: [
-            toastui.Editor.plugin.codeSyntaxHighlight,
-            toastui.Editor.plugin.tableMergedCell,
-            toastui.Editor.plugin.uml
-        ],
-        hook: {
-            addImageBlobHook: (blob, callback) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    callback(reader.result, blob.name);
-                };
-                reader.readAsDataURL(blob);
+        // Initialize Toast UI Editor
+        const editor = new Editor({
+            el: document.querySelector("#editor"),
+            height: "500px",
+            initialEditType: "markdown",
+            previewStyle: "vertical",
+            plugins: [
+                toastui.Editor.plugin.codeSyntaxHighlight,
+                toastui.Editor.plugin.tableMergedCell,
+                toastui.Editor.plugin.uml,
+            ],
+            hook: {
+                addImageBlobHook: (blob, callback) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        callback(reader.result, blob.name);
+                    };
+                    reader.readAsDataURL(blob);
+                },
+            },
+        });
+
+        // Form Validation
+        window.validateForm = function () {
+            const editorContent = editor.getHTML(); // Get the content from the editor
+            document.getElementById("editor-content").value = editorContent; // Transfer to hidden textarea
+
+            // Basic form validation for required fields
+            const templateName = document
+                .getElementById("template_name")
+                .value.trim();
+            const category = document.getElementById("category").value;
+            const description = document
+                .getElementById("description")
+                .value.trim();
+            const keywords = document.getElementById("keywords").value.trim();
+            const date = document.getElementById("date").value;
+
+            let valid = true;
+
+            // Simple validation for required fields
+            if (
+                !templateName ||
+                category === "none" ||
+                !description ||
+                !keywords ||
+                !date ||
+                !editorContent
+            ) {
+                alert("Please fill all required fields.");
+                valid = false;
+            }
+
+            return valid; // Prevent form submission if not valid
+        };
+
+        // Subcategory based on category selection
+        // Subcategories Data
+        const subcategories = {
+            lifestyle: [
+                "Parenting",
+                "Yoga",
+                "Travel",
+                "Food",
+                "Fashion",
+                "Minimalism",
+                "Health and Wellness",
+            ],
+            // technology: ["Gadgets", "AI", "Programming"],
+            //   reviews: ["Books", "Movies", "Products"],
+            // "random-thoughts": ["Personal", "Observations", "Reflections"],
+            // "stock-market": ["Analysis", "Tips", "News"],
+        };
+
+        // Update subcategories based on selected category
+        function updateSubcategories() {
+            const category = document.getElementById("category").value;
+            const subcategory = document.getElementById("subcategory");
+            subcategory.innerHTML = ""; // Clear previous options
+
+            if (subcategories[category]) {
+                subcategories[category].forEach((sub) => {
+                    const option = document.createElement("option");
+                    option.value = sub.toLowerCase().replace(/\s+/g, "-");
+                    option.textContent = sub;
+                    subcategory.appendChild(option);
+                });
+                subcategory.disabled = false;
+            } else {
+                const noneOption = document.createElement("option");
+                noneOption.value = "none";
+                noneOption.textContent = "None";
+                subcategory.appendChild(noneOption);
+                subcategory.disabled = true;
+            }
+        }
+
+        // Event listener for category changes
+        document
+            .getElementById("category")
+            .addEventListener("change", updateSubcategories);
+        updateSubcategories(); // Initialize subcategories on page load
+
+        // Pre-select category and subcategory when editing
+        if (document.getElementById("category").value) {
+            updateSubcategories();
+            const subcategoryValue = "{{ subcategory }}"; // Assuming you pass this from the server
+            if (subcategoryValue) {
+                document.getElementById("subcategory").value = subcategoryValue;
             }
         }
     });
-
-    // Form Validation
-    window.validateForm = function() {
-        const editorContent = editor.getHTML(); // Get the content from the editor
-        document.getElementById('editor-content').value = editorContent; // Transfer to hidden textarea
-
-        // Basic form validation for required fields
-        const templateName = document.getElementById('template_name').value.trim();
-        const category = document.getElementById('category').value;
-        const description = document.getElementById('description').value.trim();
-        const keywords = document.getElementById('keywords').value.trim();
-        const date = document.getElementById('date').value;
-
-        let valid = true;
-
-        // Simple validation for required fields
-        if (!templateName || category === 'none' || !description || !keywords || !date || !editorContent) {
-            alert("Please fill all required fields.");
-            valid = false;
-        }
-
-        return valid; // Proceed with submission if valid
-    };
-
-    // Subcategories Data
-    const subcategories = {
-        "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"],
-        // "technology": ["Gadgets", "AI", "Programming"]
-    };
-
-    // Update subcategories based on selected category
-    function updateSubcategories() {
-        const category = document.getElementById('category').value;
-        const subcategory = document.getElementById('subcategory');
-        subcategory.innerHTML = '';  // Clear previous options
-
-        if (subcategories[category]) {
-            subcategories[category].forEach(sub => {
-                const option = document.createElement('option');
-                option.value = sub.toLowerCase().replace(/\s+/g, '-');
-                option.textContent = sub;
-                subcategory.appendChild(option);
-            });
-            subcategory.disabled = false;
-        } else {
-            const noneOption = document.createElement('option');
-            noneOption.value = "none";
-            noneOption.textContent = "None";
-            subcategory.appendChild(noneOption);
-            subcategory.disabled = true;
-        }
-    }
-
-    // Event listener for category changes
-    document.getElementById('category').addEventListener('change', updateSubcategories);
-    updateSubcategories();  // Initialize subcategories on page load
-});
 </script>
 {% endblock %}
