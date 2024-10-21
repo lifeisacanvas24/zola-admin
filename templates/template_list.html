@@ -1,0 +1,18 @@
+<!-- templates/templates_list.html -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Blog Posts</h1>
+    <ul>
+        {% for template in templates %}
+            <li>
+                {{ template }}
+                <a href="/templates/edit/{{ template }}">Edit</a>
+                <form action="/templates/delete/{{ template }}" method="post" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this template?');">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Home</a>
+{% endblock %}

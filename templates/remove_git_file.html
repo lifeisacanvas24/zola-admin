@@ -1,0 +1,16 @@
+<!-- templates/remove_git_file.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Remove Git File</h1>
+<form method="post">
+    <label for="file_path">Select File to Remove:</label>
+    <select id="file_path" name="file_path" required>
+        {% for file in files %}
+        <option value="{{ file }}">{{ file }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Remove File</button>
+</form>
+<a href="/admin/blog/git/files/">Back to Git Files</a>
+{% endblock %}

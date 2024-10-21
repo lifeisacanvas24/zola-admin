@@ -1,0 +1,23 @@
+<!-- templates/git_files.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="title">Git Repository Files</h1>
+    <ul>
+        {% for file in files %}
+            <li>{{ file }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="subtitle">Add a New File</h2>
+    <form action="/admin/blog/git/add-file/" method="post">
+        <input type="text" name="file_path" placeholder="File path" required>
+        <button type="submit">Add File</button>
+    </form>
+
+    <h2 class="subtitle">Remove a File</h2>
+    <form action="/admin/blog/git/remove-file/" method="post">
+        <input type="text" name="file_path" placeholder="File path" required>
+        <button type="submit">Remove File</button>
+    </form>
+{% endblock %}

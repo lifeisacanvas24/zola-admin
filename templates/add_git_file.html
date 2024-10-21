@@ -1,0 +1,12 @@
+<!-- templates/add_git_file.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Add Git File</h1>
+<form method="post">
+    <label for="file_path">File Path:</label>
+    <input type="text" id="file_path" name="file_path" required>
+    <button type="submit">Add File</button>
+</form>
+<a href="/admin/blog/git/files/">Back to Git Files</a>
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends "base.html" %} {% block content %}
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">
+            {% if is_edit %}Edit Post{% else %}Create New Post{% endif %}
+        </h1>
+        <form
+            method="post"
+            action="{{ url_for('add_new_post') }}"
+            onsubmit="return validateForm()"
+        >
+            <input
+                type="hidden"
+                name="is_edit"
+                value="{{ 'true' if is_edit else 'false' }}"
+            />
+            <input
+                type="hidden"
+                name="original_file_name"
+                value="{{ original_file_name }}"
+            />
+
+            <div class="field">
+                <label class="label" for="template_name">Title</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="template_name"
+                        name="template_name"
+                        required
+                        value="{{ template_name }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="category">Category</label>
+                <div class="control">
+                    <div class="select">
+                       <select id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            <option
+                                value="lifestyle"
+                                {% if category == "lifestyle" %}selected{% endif %}
+                            >
+                                Lifestyle
+                            </option>
+                            <option
+                                value="technology"
+                                {% if category == "technology" %}selected{% endif %}
+                            >
+                                Technology
+                            </option>
+                            <option
+                                value="reviews"
+                                {% if category == "reviews" %}selected{% endif %}
+                            >
+                                Reviews
+                            </option>
+                            <option
+                                value="random-thoughts"
+                                {% if category == "random-thoughts" %}selected{% endif %}
+                            >
+                                Random Thoughts
+                            </option>
+                            <option
+                                value="stock-market"
+                                {% if category == "stock-market" %}selected{% endif %}
+                            >
+                                Stock Market
+                            </option>
+                                                   </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="subcategory">Subcategory</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="subcategory" name="subcategory">
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="description">Description</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="description"
+                        name="description"
+                        required
+                        value="{{ description }}"
+                    />
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="keywords"
+                    >Keywords (comma-separated)</label
+                >
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="keywords"
+                        name="keywords"
+                        required
+                        value="{{ keywords }}"
+                    />
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="date">Date</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                        value="{{ date }}"
+                    />
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="checkbox">
+                    <input
+                        type="checkbox"
+                        id="draft"
+                        name="draft"
+                        {%
+                        if
+                        draft
+                        %}checked{%
+                        endif
+                        %}
+                    />
+                    Draft
+                </label>
+            </div>
+
+            <div class="field">
+                <label class="label" for="author">Author</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="author"
+                        name="author"
+                        required
+                        value="{{ author }}"
+                    />
+                </div>
+            </div>
+
+            <h3 class="subtitle">Open Graph Metadata</h3>
+            <div class="field">
+                <label class="checkbox">
+                  <input type="checkbox" id="og-metadata-toggle" />
+                    Copy from Front Matter
+                </label>
+            </div>
+            <div class="field">
+                <label class="label" for="og_title">OG Title</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_title"
+                        name="og_title"
+                        value="{{ og_title }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="og_description">OG Description</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_description"
+                        name="og_description"
+                        value="{{ og_description }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="og_image">OG Image</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_image"
+                        name="og_image"
+                        value="{{ og_image }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="og_url">OG URL</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_url"
+                        name="og_url"
+                        value="{{ og_url }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="og_type">OG Type</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="og_type"
+                        name="og_type"
+                        value="{{ og_type }}"
+                    />
+                </div>
+            </div>
+
+            <h3 class="subtitle">JSON-LD Metadata</h3>
+            <div class="field">
+                <label class="checkbox">
+                   <input type="checkbox" id="json-ld-metadata-toggle" />
+                    Copy from Front Matter
+                </label>
+            </div>
+            <div class="field">
+                <label class="label" for="json_ld_name">JSON-LD Name</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_name"
+                        name="json_ld_name"
+                        value="{{ json_ld_name }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="json_ld_description"
+                    >JSON-LD Description</label
+                >
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_description"
+                        name="json_ld_description"
+                        value="{{ json_ld_description }}"
+                    />
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="json_ld_url">JSON-LD URL</label>
+                <div class="control">
+                    <input
+                        class="input"
+                        type="text"
+                        id="json_ld_url"
+                        name="json_ld_url"
+                        value="{{ json_ld_url }}"
+                    />
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="editor-content">Content</label>
+                <div class="control">
+                    <div id="editor"></div>
+                    <textarea id="editor-content" name="content" style="display: none"></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary" type="submit">
+                        {% if is_edit %}Update Post{% else %}Create Post{% endif
+                        %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+<link
+    rel="stylesheet"
+    href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"
+/>
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+<script>
+
+// Define functions globally
+    function validateForm() {
+        document.getElementById("editor-content").value = editor.getMarkdown();
+        return true;
+    }
+
+   // Update subcategories based on selected category
+
+   function updateSubcategories() {
+       console.log("Updating subcategories");
+       const category = document.getElementById('category').value;
+       const subcategory = document.getElementById('subcategory');
+       console.log("Selected category:", category);
+       console.log("Subcategory element:", subcategory);
+
+       if (!subcategory) {
+           console.error("Subcategory select element not found");
+           return;
+       }
+
+       subcategory.innerHTML = '';  // Clear previous options
+
+       if (subcategories[category]) {
+           console.log("Subcategories found for category:", subcategories[category]);
+           subcategories[category].forEach(sub => {
+               const option = document.createElement('option');
+               option.value = sub.toLowerCase().replace(/\s+/g, '-');
+               option.textContent = sub;
+               option.selected = (option.value === "{{ subcategory }}");
+               subcategory.appendChild(option);
+           });
+           subcategory.disabled = false;
+       } else {
+           console.log("No subcategories found for category:", category);
+           const noneOption = document.createElement('option');
+           noneOption.value = "";
+           noneOption.textContent = "None";
+           subcategory.appendChild(noneOption);
+           subcategory.disabled = true;
+       }
+   }
+
+   // Call updateSubcategories when the page loads
+   document.addEventListener("DOMContentLoaded", function() {
+       updateSubcategories();
+   });
+
+
+   function toggleOgMetadata() {
+       console.log("Toggling OG Metadata");
+       const isChecked = document.getElementById("og-metadata-toggle").checked;
+       console.log("OG Metadata toggle checked:", isChecked);
+       if (isChecked) {
+              const templateName = document.getElementById("template_name").value;
+              const description = document.getElementById("description").value;
+              const category = document.getElementById("category").value;
+              const subcategory = document.getElementById("subcategory").value;
+
+              console.log("Template Name:", templateName);
+              console.log("Description:", description);
+              console.log("Category:", category);
+              console.log("Subcategory:", subcategory);
+
+              document.getElementById("og_title").value = templateName;
+              document.getElementById("og_description").value = description;
+              document.getElementById("og_url").value = `http://lifeisacanvas24.github.io/blog/${category}/${subcategory}/${templateName.toLowerCase().replace(/\s+/g, "-")}/`;
+              document.getElementById("og_type").value = "article";
+
+              console.log("OG Title set to:", document.getElementById("og_title").value);
+              console.log("OG Description set to:", document.getElementById("og_description").value);
+              console.log("OG URL set to:", document.getElementById("og_url").value);
+              console.log("OG Type set to:", document.getElementById("og_type").value);
+          }
+      }
+
+      // Add event listener for OG Metadata toggle
+      document.addEventListener("DOMContentLoaded", function() {
+          const ogMetadataToggle = document.getElementById("og-metadata-toggle");
+          if (ogMetadataToggle) {
+              ogMetadataToggle.addEventListener("change", toggleOgMetadata);
+          } else {
+              console.error("OG Metadata toggle element not found");
+          }
+      });
+
+    function toggleJsonLdMetadata() {
+        const isChecked = document.getElementById("json-ld-metadata-toggle").checked;
+        if (isChecked) {
+            document.getElementById("json_ld_name").value = document.getElementById("template_name").value;
+            document.getElementById("json_ld_description").value = document.getElementById("description").value;
+            document.getElementById("json_ld_url").value = `http://lifeisacanvas24.github.io/blog/${document.getElementById("category").value}/${document.getElementById("subcategory").value}/${document.getElementById("template_name").value.toLowerCase().replace(/\s+/g, "-")}/`;
+        }
+    }
+
+    // Global variables
+    let editor;
+    const subcategories = {
+        "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"],
+        //"technology": ["Gadgets", "AI", "Programming"],
+        //"reviews": ["Books", "Movies", "Products"],
+        //"random-thoughts": [],
+        //"stock-market": ["Analysis", "News", "Tips"]
+    };
+
+
+    // Initialize everything when the DOM is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        try {
+            // Get the initial content safely from the template
+            let initialContent = `{{ content | safe }}`;
+
+            // Escape the initial content for safe JS usage
+            initialContent = initialContent.replace(/\\/g, '\\\\') // Escape backslashes
+                                           .replace(/'/g, "\\'")  // Escape single quotes
+                                           .replace(/"/g, '\\"')  // Escape double quotes
+                                           .replace(/`/g, '\\`')  // Escape backticks
+                                           .replace(/</g, "&lt;") // Escape less than
+                                           .replace(/>/g, "&gt;") // Escape greater than
+                                           .replace(/\r?\n/g, "\n"); // Normalize new lines
+
+            console.log("Escaped Initial Content:", initialContent); // Check after escaping
+
+            const editorContainer = document.querySelector("#editor");
+            if (!editorContainer) {
+                throw new Error("Editor container not found");
+            }
+
+            editor = new toastui.Editor({
+                el: editorContainer,
+                height: "500px",
+                initialEditType: "markdown",
+                previewStyle: "vertical",
+                initialValue: initialContent
+            });
+
+            // Update the hidden textarea with the editor content when the form is submitted
+            document.querySelector("form").addEventListener("submit", function() {
+                document.getElementById("editor-content").value = editor.getMarkdown();
+            });
+
+        } catch (error) {
+            console.error("Error initializing editor:", error);
+            const editorContainer = document.querySelector("#editor");
+            if (editorContainer) {
+                editorContainer.textContent = "Error loading editor. Please try refreshing the page.";
+            }
+        }
+        // Initialize subcategories and add event listeners
+        updateSubcategories();
+        document.getElementById('category').addEventListener('change', updateSubcategories);
+        document.getElementById('og-metadata-toggle').addEventListener('change', toggleOgMetadata);
+        document.getElementById('json-ld-metadata-toggle').addEventListener('change', toggleJsonLdMetadata);
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+<!-- templates/sidebar.html -->
+{% if user %}
+<aside class="menu">
+    <span class="icon"><i class="fas fa-tags"></i></span>Manage Users
+    <ul class="menu-list">
+        <li><a href="/users/"><span class="icon"><i class="fas fa-list"></i></span> View Users</a></li>
+        <li><a href="/add-user/"><span class="icon"><i class="fas fa-user-plus"></i></span>Add User</a></li>
+    </ul>
+
+    <span class="icon"><i class="fas fa-tags"></i></span>Manage Blog
+    <ul class="menu-list">
+        <li><a href="/add-new-post/"><span class="icon"><i class="fas fa-plus"></i></span>Add Post</a></li>
+        <li><a href="/list-posts/"><span class="icon"><i class="fas fa-list"></i></span>List Posts</a></li>
+    </ul>
+<!--
+    <span class="icon"><i class="fas fa-tags"></i></span>Manage Categories
+    <ul class="menu-list">
+        <li>
+            <a href="#"><span class="icon"><i class="fas fa-tags"></i></span> Manage Categories</a>
+            <ul>
+                <li><a href="/admin/blog/categories/add">Add Category</a></li>
+                <li><a href="/admin/blog/categories/list">List Categories</a></li>
+                <li><a href="/admin/blog/categories/modify">Modify Category</a></li>
+                <li><a href="/admin/blog/categories/delete">Delete Category</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#"><span class="icon"><i class="fas fa-tag"></i></span> Manage Sub Categories</a>
+            <ul>
+                <li><a href="/admin/blog/subcategories/add">Add Sub Category</a></li>
+                <li><a href="/admin/blog/subcategories/list">List Sub Categories</a></li>
+                <li><a href="/admin/blog/subcategories/modify">Modify Sub Category</a></li>
+                <li><a href="/admin/blog/subcategories/delete">Delete Sub Category</a></li>
+            </ul>
+        </li>
+    </ul>
+
+    <span class="icon"><i class="fas fa-file-alt"></i></span>Manage Templates
+    <ul class="menu-list">
+        <li>
+            <a href="#"><span class="icon"><i class="fas fa-file-alt"></i></span> Manage Markdown Templates</a>
+            <ul>
+                <li><a href="/admin/blog/templates/add">Add Template</a></li>
+                <li><a href="/admin/blog/templates/list">List Templates</a></li>
+                <li><a href="/admin/blog/templates/modify">Modify Template</a></li>
+                <li><a href="/admin/blog/templates/delete">Delete Template</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#"><span class="icon"><i class="fas fa-layer-group"></i></span> Manage Category Specific Templates</a>
+            <ul>
+                <li><a href="/admin/blog/category-templates/add">Add Template</a></li>
+                <li><a href="/admin/blog/category-templates/list">List Templates</a></li>
+                <li><a href="/admin/blog/category-templates/modify">Modify Template</a></li>
+                <li><a href="/admin/blog/category-templates/delete">Delete Template</a></li>
+            </ul>
+        </li>
+    </ul>
+ -->
+<!--
+ <span class="icon"><i class="fas fa-code-branch"></i></span>Manage Git
+    <ul class="menu-list">
+        <li><a href="/admin/blog/git/files/"><span class="icon"><i class="fas fa-list"></i></span> List Git Files</a></li>
+        <li><a href="/admin/blog/git/add-file/"><span class="icon"><i class="fas fa-plus"></i></span> Add Git File</a></li>
+        <li><a href="/admin/blog/git/remove-file/"><span class="icon"><i class="fas fa-trash-alt"></i></span> Remove Git File</a></li>
+    </ul>
+-->
+
+</aside>
+{% endif %}

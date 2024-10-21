@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Modify User{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Modify User</h1>
+        <form method="post" action="/modify-user/{{ target_user.userid }}/">
+            <div class="field">
+                <label class="label">Username</label>
+                <div class="control">
+                    <input class="input" type="text" name="username" value="{{ target_user.username }}" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Password</label>
+                <div class="control">
+                    <input class="input" type="password" name="password" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-link">Update User</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

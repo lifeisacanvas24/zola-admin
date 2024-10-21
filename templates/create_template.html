@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create New Template</h1>
+    <form action="/templates/new/" method="post" id="template-form">
+        <label for="template_name">Template Name:</label>
+        <input type="text" id="template_name" name="template_name" required><br>
+
+        <!-- Front matter fields -->
+        <h3>Front Matter</h3>
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br>
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required><br>
+
+        <label for="keywords">Keywords (comma-separated):</label>
+        <input type="text" id="keywords" name="keywords" required><br>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required><br>
+
+        <label for="draft">Draft:</label>
+        <input type="checkbox" id="draft" name="draft"><br>
+
+        <h3>Open Graph Metadata</h3>
+        <label for="og_title">OG Title:</label>
+        <input type="text" id="og_title" name="og_title"><br>
+
+        <label for="og_description">OG Description:</label>
+        <input type="text" id="og_description" name="og_description"><br>
+
+        <label for="og_image">OG Image Path:</label>
+        <input type="text" id="og_image" name="og_image"><br>
+
+        <label for="og_url">OG URL:</label>
+        <input type="text" id="og_url" name="og_url"><br>
+
+        <label for="og_type">OG Type:</label>
+        <input type="text" id="og_type" name="og_type" value="article"><br>
+
+        <h3>Additional Meta Tags</h3>
+        <label for="author">Author Name:</label>
+        <input type="text" id="author" name="author"><br>
+
+        <label for="viewport">Viewport:</label>
+        <input type="text" id="viewport" name="viewport" value="width=device-width, initial-scale=1"><br>
+
+        <h3>JSON-LD Metadata</h3>
+        <label for="json_ld_name">JSON-LD Name:</label>
+        <input type="text" id="json_ld_name" name="json_ld_name"><br>
+
+        <label for="json_ld_description">JSON-LD Description:</label>
+        <input type="text" id="json_ld_description" name="json_ld_description"><br>
+
+        <label for="json_ld_url">JSON-LD URL:</label>
+        <input type="text" id="json_ld_url" name="json_ld_url"><br>
+
+        <!-- Toast UI editor container -->
+        <div id="editor"></div>
+
+        <!-- Hidden textarea to hold the editor content -->
+        <textarea name="content" id="editor-content" style="display:none;"></textarea>
+
+        <button type="submit" onclick="submitContent()">Create Template</button>
+    </form>
+    <a href="/templates/">Back to Templates</a>
+
+    <!-- Include Toast UI CSS and JS -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css">
+    <script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
+    <script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
+    <script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+
+    <script>
+        // Initialize the Toast UI editor with plugins
+        const editor = new toastui.Editor({
+            el: document.querySelector('#editor'),
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            height: '500px',
+            initialValue: `{{ content }}`,
+            plugins: [
+                toastui.Editor.plugin.chart,  // Charts plugin
+                toastui.Editor.plugin.codeSyntaxHighlight,  // Syntax highlighting for code blocks
+            ]
+        });
+
+        // Function to set editor content to textarea on form submit
+        function submitContent() {
+            // Gather all the form data
+            const formData = new FormData(document.getElementById('template-form'));
+
+            // Set editor content to hidden textarea
+            document.getElementById('editor-content').value = editor.getMarkdown();
+
+            // You can manipulate the FormData here if needed, e.g., for additional processing
+            // Or send it using fetch or XMLHttpRequest if desired
+        }
+    </script>
+{% endblock %}

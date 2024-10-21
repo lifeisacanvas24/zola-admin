@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">User Management</h1>
+
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.userid }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <a href="/modify-user/{{ user.userid }}/">Modify</a> |
+                        <a href="/delete-user/{{ user.userid }}/" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

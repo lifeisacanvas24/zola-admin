@@ -1,0 +1,105 @@
+/* Sidebar Styling */
+.menu {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.menu .menu-list a {
+    color: #363636;
+    padding: 0.75rem;
+    border-radius: 6px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu .menu-list a:hover {
+    background-color: #3273dc;
+    color: white;
+}
+
+.menu .icon {
+    margin-right: 8px;
+    color: #3273dc;
+}
+
+.menu-list a .icon i {
+    font-size: 1.2rem;
+    vertical-align: middle;
+}
+
+/* Header Styling */
+.navbar {
+    background-color: #3273dc;
+    padding: 1rem 1.5rem;
+}
+
+.navbar .navbar-item {
+    color: white;
+    font-weight: bold;
+}
+
+.navbar-burger {
+    color: white;
+}
+
+.navbar .button.is-light {
+    border: 2px solid white;
+    color: white;
+}
+
+.navbar .button.is-light:hover {
+    background-color: white;
+    color: #3273dc;
+}
+
+/* Footer Styling */
+.footer {
+    background-color: #f5f5f5;
+    padding: 2rem;
+    border-top: 1px solid #dbdbdb;
+}
+
+.footer p {
+    color: #4a4a4a;
+    font-size: 1rem;
+}
+
+/* Icons Color */
+.icon i {
+    color: #3273dc;
+}
+
+<style>
+.accordion {
+    border: 1px solid #ddd; /* Border around the accordion */
+    border-radius: 5px; /* Rounded corners */
+    margin-bottom: 1rem; /* Space between accordions */
+}
+
+.accordion-header {
+    background-color: #f7f7f7; /* Header background color */
+    padding: 1rem; /* Padding inside the header */
+    cursor: pointer; /* Cursor change to indicate clickable */
+    position: relative; /* For positioning the arrow */
+}
+
+.accordion-button::after {
+    content: ""; /* Arrow */
+    border: solid transparent; /* Arrow styling */
+    border-width: 5px 5px 0 5px;
+    border-top-color: #333; /* Arrow color */
+    position: absolute; /* Position the arrow */
+    right: 1rem; /* Align to the right */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%) rotate(0deg); /* Rotate arrow for open/closed state */
+    transition: transform 0.2s ease; /* Smooth transition for rotation */
+}
+
+.accordion-content {
+    padding: 1rem; /* Padding for content area */
+}
+
+.accordion-header.active .accordion-button::after {
+    transform: translateY(-50%) rotate(180deg); /* Rotate arrow when active */
+}
