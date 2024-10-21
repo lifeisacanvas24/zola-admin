@@ -443,7 +443,7 @@ async def edit_markdown_post(
     tags = [{', '.join([f'"{tag.strip()}"' for tag in keywords.split(',')])}]
     +++"""
 
-        # Combine front matter with content
+        # Combine front matter with content to make sure it is compatible as per zola.
         template_content = front_matter + "\n" + content
 
         # Write the updated content to the file
