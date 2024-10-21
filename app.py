@@ -636,15 +636,7 @@ async def delete_template(request: Request, template_name: str):
         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
     return RedirectResponse(url="/templates/", status_code=303)
-''''
-@app.get("/add-new-post/", response_class=HTMLResponse)
-async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
 
-    return templates.TemplateResponse("new_post.html", {"request": request, "user": user})
-'''
 @app.get("/add-new-post/", response_class=HTMLResponse)
 async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
     user = get_logged_in_user(request)
