@@ -1,3 +1,4 @@
+import html
 import logging
 import os
 import sqlite3
@@ -695,7 +696,8 @@ async def new_post(request: Request, category: Optional[str] = None, subcategory
             "json_ld_name": front_matter.get("json_ld", {}).get("name", ""),
             "json_ld_description": front_matter.get("json_ld", {}).get("description", ""),
             "json_ld_url": front_matter.get("json_ld", {}).get("url", ""),
-            "content": post_content,  # No need to escape here
+            "content": html.escape(post_content).replace('`', '\\`'),  # Escape special HTML characters and backticks
+#            "content": post_content,  # No need to escape here
         })
 
     return templates.TemplateResponse("new_post.html", {**template_data, "request": request})
@@ -759,6 +761,12 @@ async def add_new_post(
     ]
     +++
     """
+    content = content.replace('\\`\\`\\`', '```') \
+                     .replace('\\`', '`') \
+                     .replace('&amp;gt;', '>') \
+                     .replace('&amp;lt;', '<') \
+                     .replace('&amp;quot;', '"')
+
     post_content = front_matter + "\n" + content  # Corrected variable name from front_mater to front_matter
 
     file_name = original_file_name if is_edit else f"{template_name.lower().replace(' ', '-')}.md"

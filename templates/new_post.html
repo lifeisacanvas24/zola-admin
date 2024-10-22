@@ -293,14 +293,16 @@
         </form>
     </div>
 </section>
+
+<!-- Initialize Toast UI Editor  -->
 <link
     rel="stylesheet"
     href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"
 />
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
-<script>
 
+<script>
 // Define functions globally
     function validateForm() {
         document.getElementById("editor-content").value = editor.getMarkdown();
@@ -310,11 +312,8 @@
    // Update subcategories based on selected category
 
    function updateSubcategories() {
-       console.log("Updating subcategories");
        const category = document.getElementById('category').value;
        const subcategory = document.getElementById('subcategory');
-       console.log("Selected category:", category);
-       console.log("Subcategory element:", subcategory);
 
        if (!subcategory) {
            console.error("Subcategory select element not found");
@@ -405,49 +404,48 @@
         //"stock-market": ["Analysis", "News", "Tips"]
     };
 
-
-    // Initialize everything when the DOM is loaded
     document.addEventListener("DOMContentLoaded", function () {
-        try {
-            // Get the initial content safely from the template
-            let initialContent = `{{ content | safe }}`;
+           try {
+               // Get the initial content safely from the template
+               let initialContent = `{{ content | safe }}`;
 
-            // Escape the initial content for safe JS usage
-            initialContent = initialContent.replace(/\\/g, '\\\\') // Escape backslashes
-                                           .replace(/'/g, "\\'")  // Escape single quotes
-                                           .replace(/"/g, '\\"')  // Escape double quotes
-                                           .replace(/`/g, '\\`')  // Escape backticks
-                                           .replace(/</g, "&lt;") // Escape less than
-                                           .replace(/>/g, "&gt;") // Escape greater than
-                                           .replace(/\r?\n/g, "\n"); // Normalize new lines
+               // Escape the initial content for safe JS usage
+               initialContent = initialContent.replace(/\\/g, '\\\\') // Escape backslashes
+                                              .replace(/'/g, "\\'")  // Escape single quotes
+                                              .replace(/"/g, '\\"')  // Escape double quotes
+                                              .replace(/`/g, '\\`')  // Escape backticks
+                                              .replace(/</g, "&lt;") // Escape less than
+                                              .replace(/>/g, "&gt;") // Escape greater than
+                                              .replace(/\r?\n/g, "\n"); // Normalize new lines
 
-            console.log("Escaped Initial Content:", initialContent); // Check after escaping
+               console.log("Escaped Initial Content:", initialContent); // Check after escaping
 
-            const editorContainer = document.querySelector("#editor");
-            if (!editorContainer) {
-                throw new Error("Editor container not found");
-            }
+               const editorContainer = document.querySelector("#editor");
+               if (!editorContainer) {
+                   throw new Error("Editor container not found");
+               }
 
-            editor = new toastui.Editor({
-                el: editorContainer,
-                height: "500px",
-                initialEditType: "markdown",
-                previewStyle: "vertical",
-                initialValue: initialContent
-            });
+               editor = new toastui.Editor({
+                   el: editorContainer,
+                   height: "500px",
+                   initialEditType: "markdown",
+                   previewStyle: "vertical",
+                   initialValue: initialContent
+               });
 
-            // Update the hidden textarea with the editor content when the form is submitted
-            document.querySelector("form").addEventListener("submit", function() {
-                document.getElementById("editor-content").value = editor.getMarkdown();
-            });
+               // Update the hidden textarea with the editor content when the form is submitted
+               document.querySelector("form").addEventListener("submit", function() {
+                   document.getElementById("editor-content").value = editor.getMarkdown();
+               });
 
-        } catch (error) {
-            console.error("Error initializing editor:", error);
-            const editorContainer = document.querySelector("#editor");
-            if (editorContainer) {
-                editorContainer.textContent = "Error loading editor. Please try refreshing the page.";
-            }
-        }
+           } catch (error) {
+               console.error("Error initializing editor:", error);
+               const editorContainer = document.querySelector("#editor");
+               if (editorContainer) {
+                   editorContainer.textContent = "Error loading editor. Please try refreshing the page.";
+               }
+           }
+
         // Initialize subcategories and add event listeners
         updateSubcategories();
         document.getElementById('category').addEventListener('change', updateSubcategories);

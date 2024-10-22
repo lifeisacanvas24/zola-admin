@@ -4,8 +4,6 @@ __pycache__/
 *$py.class
 .env
 zolanew_admin.db
-empty-db-tables.py
-verify-data.py
 
 # C extensions
 *.so
