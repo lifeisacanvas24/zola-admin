@@ -2,4 +2,6 @@
 
 ## Making the initial commit
 
+###Updated the fix
+
 ## I know this is counter inutive to the fundamentals of a static site generator, however wanted to have an easy way for users to have the best of both worlds in a minimalistic way possible.
