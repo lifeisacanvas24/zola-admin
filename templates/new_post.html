@@ -323,7 +323,6 @@
        subcategory.innerHTML = '';  // Clear previous options
 
        if (subcategories[category]) {
-           console.log("Subcategories found for category:", subcategories[category]);
            subcategories[category].forEach(sub => {
                const option = document.createElement('option');
                option.value = sub.toLowerCase().replace(/\s+/g, '-');
@@ -333,7 +332,6 @@
            });
            subcategory.disabled = false;
        } else {
-           console.log("No subcategories found for category:", category);
            const noneOption = document.createElement('option');
            noneOption.value = "";
            noneOption.textContent = "None";
@@ -347,52 +345,73 @@
        updateSubcategories();
    });
 
+   function constructURL(category, subcategory, templateName) {
+     // Build the base URL inside the function to avoid appending multiple times
+     let permaLink = `http://lifeisacanvas24.github.io/blog/${category}/`;
+
+     // Check if subcategory exists and append it to the URL if it does
+     if (subcategory && subcategory.trim() !== "") {
+       permaLink += `${subcategory}/`;
+     }
+
+     // Append the template name to the URL
+     permaLink += `${templateName.toLowerCase().replace(/\s+/g, "-")}/`;
+
+     return permaLink;
+   }
 
    function toggleOgMetadata() {
-       console.log("Toggling OG Metadata");
-       const isChecked = document.getElementById("og-metadata-toggle").checked;
-       console.log("OG Metadata toggle checked:", isChecked);
-       if (isChecked) {
-              const templateName = document.getElementById("template_name").value;
-              const description = document.getElementById("description").value;
-              const category = document.getElementById("category").value;
-              const subcategory = document.getElementById("subcategory").value;
+     const isChecked = document.getElementById("og-metadata-toggle").checked;
+     if (isChecked) {
+       const templateName = document.getElementById("template_name").value;
+       const description = document.getElementById("description").value;
+       const category = document.getElementById("category").value;
+       const subcategory = document.getElementById("subcategory").value;
 
-              console.log("Template Name:", templateName);
-              console.log("Description:", description);
-              console.log("Category:", category);
-              console.log("Subcategory:", subcategory);
+       document.getElementById("og_title").value = templateName;
+       document.getElementById("og_description").value = description;
 
-              document.getElementById("og_title").value = templateName;
-              document.getElementById("og_description").value = description;
-              document.getElementById("og_url").value = `http://lifeisacanvas24.github.io/blog/${category}/${subcategory}/${templateName.toLowerCase().replace(/\s+/g, "-")}/`;
-              document.getElementById("og_type").value = "article";
+       // Set the og_url field to the constructed URL using constructURL function
+       document.getElementById("og_url").value = constructURL(category, subcategory, templateName);
+       document.getElementById("og_type").value = "post";
+     }
+   }
 
-              console.log("OG Title set to:", document.getElementById("og_title").value);
-              console.log("OG Description set to:", document.getElementById("og_description").value);
-              console.log("OG URL set to:", document.getElementById("og_url").value);
-              console.log("OG Type set to:", document.getElementById("og_type").value);
-          }
-      }
+   // Add event listener for OG Metadata toggle
+   document.addEventListener("DOMContentLoaded", function() {
+     const ogMetadataToggle = document.getElementById("og-metadata-toggle");
+     if (ogMetadataToggle) {
+       ogMetadataToggle.addEventListener("change", toggleOgMetadata);
+     } else {
+       console.error("OG Metadata toggle element not found");
+     }
+   });
 
-      // Add event listener for OG Metadata toggle
-      document.addEventListener("DOMContentLoaded", function() {
-          const ogMetadataToggle = document.getElementById("og-metadata-toggle");
-          if (ogMetadataToggle) {
-              ogMetadataToggle.addEventListener("change", toggleOgMetadata);
-          } else {
-              console.error("OG Metadata toggle element not found");
-          }
-      });
+   function toggleJsonLdMetadata() {
+     const isChecked = document.getElementById("json-ld-metadata-toggle").checked;
+     if (isChecked) {
+       const templateName = document.getElementById("template_name").value;
+       const description = document.getElementById("description").value;
+       const category = document.getElementById("category").value;
+       const subcategory = document.getElementById("subcategory").value;
 
-    function toggleJsonLdMetadata() {
-        const isChecked = document.getElementById("json-ld-metadata-toggle").checked;
-        if (isChecked) {
-            document.getElementById("json_ld_name").value = document.getElementById("template_name").value;
-            document.getElementById("json_ld_description").value = document.getElementById("description").value;
-            document.getElementById("json_ld_url").value = `http://lifeisacanvas24.github.io/blog/${document.getElementById("category").value}/${document.getElementById("subcategory").value}/${document.getElementById("template_name").value.toLowerCase().replace(/\s+/g, "-")}/`;
-        }
-    }
+       document.getElementById("json_ld_name").value = templateName;
+       document.getElementById("json_ld_description").value = description;
+
+       // Set the json_ld_url field to the constructed URL using constructURL function
+       document.getElementById("json_ld_url").value = constructURL(category, subcategory, templateName);
+     }
+   }
+
+   // Add event listener for JSON-LD Metadata toggle
+   document.addEventListener("DOMContentLoaded", function() {
+     const jsonLdMetadataToggle = document.getElementById("json-ld-metadata-toggle");
+     if (jsonLdMetadataToggle) {
+       jsonLdMetadataToggle.addEventListener("change", toggleJsonLdMetadata);
+     } else {
+       console.error("JSON-LD Metadata toggle element not found");
+     }
+   });
 
     // Global variables
     let editor;
@@ -417,8 +436,6 @@
                                               .replace(/</g, "&lt;") // Escape less than
                                               .replace(/>/g, "&gt;") // Escape greater than
                                               .replace(/\r?\n/g, "\n"); // Normalize new lines
-
-               console.log("Escaped Initial Content:", initialContent); // Check after escaping
 
                const editorContainer = document.querySelector("#editor");
                if (!editorContainer) {
