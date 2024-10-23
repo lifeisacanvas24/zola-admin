@@ -760,12 +760,19 @@ async def add_new_post(
         {{ datePublished = "{date}" }}
     ]
     +++
-    """
-    content = content.replace('\\`\\`\\`', '```') \
-                     .replace('\\`', '`') \
-                     .replace('&amp;gt;', '>') \
-                     .replace('&amp;lt;', '<') \
-                     .replace('&amp;quot;', '"')
+"""
+# First, decode double-escaped characters
+    content = content.replace('&amp;gt;', '&gt;') \
+                 .replace('&amp;lt;', '&lt;') \
+                 .replace('&amp;quot;', '&quot;') \
+                 .replace('&amp;', '&')
+
+# Then, replace the standard HTML entities
+    content =  content.replace('&gt;', '>') \
+                 .replace('&lt;', '<') \
+                 .replace('&quot;', '"') \
+                 .replace('\\`\\`\\`', '```') \
+                 .replace('\\`', '`')
 
     post_content = front_matter + "\n" + content  # Corrected variable name from front_mater to front_matter
 
