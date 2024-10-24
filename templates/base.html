@@ -1,43 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Dashboard</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.0/css/bulma.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', path='css/style.css') }}"
+        />
+    </head>
+    <body>
+        <!-- Include the header -->
+        {% include 'header.html' %}
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.0/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
-</head>
-<body>
-     <!-- Include the header -->
-    {% include 'header.html' %}
-
-    <div class="columns">
-        <div class="column is-3">
-            {% if user %}
-                {% include 'sidebar.html' %}
-            {% endif %}
+        <div class="columns">
+            <div class="column is-3">
+                {% if user %} {% include 'sidebar.html' %} {% endif %}
+            </div>
+            <div class="column is-9">
+                {% block content %}
+                <!-- This will be replaced by specific page content -->
+                {% endblock %}
+            </div>
         </div>
-        <div class="column is-9">
-            {% block content %}
-            <!-- This will be replaced by specific page content -->
-            {% endblock %}
-        </div>
-    </div>
 
-    {% include 'footer.html' %}
-<!-- Include the footer -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const burger = document.getElementById('navbar-burger');
-            const menu = document.getElementById('navbar-menu');
+        {% include 'footer.html' %}
+        <!-- Include the footer -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const burger = document.getElementById("navbar-burger");
+                const menu = document.getElementById("navbar-menu");
 
-            burger.addEventListener('click', () => {
-                burger.classList.toggle('is-active');
-                menu.classList.toggle('is-active');
+                burger.addEventListener("click", () => {
+                    burger.classList.toggle("is-active");
+                    menu.classList.toggle("is-active");
+                });
             });
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
