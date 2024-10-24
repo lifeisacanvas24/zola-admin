@@ -304,55 +304,55 @@ async def delete_user(request: Request, userid: int):
         conn.commit()
     return RedirectResponse(url="/users/", status_code=303)
 
-# Template management routes
-def list_html_templates():
-    template_dir = TEMPLATE_DIR
-    try:
-        templates = [f for f in os.listdir(template_dir) if f.endswith('.html')]
-    except FileNotFoundError:
-        logging.error(f"Template directory not found: {template_dir}")
-        return []
-    except PermissionError:
-        logging.error(f"Permission denied accessing: {template_dir}")
-        return []
-    return templates
+# # Template management routes
+# def list_html_templates():
+#     template_dir = TEMPLATE_DIR
+#     try:
+#         templates = [f for f in os.listdir(template_dir) if f.endswith('.html')]
+#     except FileNotFoundError:
+#         logging.error(f"Template directory not found: {template_dir}")
+#         return []
+#     except PermissionError:
+#         logging.error(f"Permission denied accessing: {template_dir}")
+#         return []
+#     return templates
 
-def list_markdown_files(page: int = 1, limit: int = 20, section: str = None):
-    markdown_dir = BLOG_CONTENT_PATH
-    markdown_files = []
+# def list_markdown_files(page: int = 1, limit: int = 20, section: str = None):
+#     markdown_dir = BLOG_CONTENT_PATH
+#     markdown_files = []
 
-    try:
-        for root, _, files in os.walk(markdown_dir):
-            for f in files:
-                if f.endswith('.md') and f != '_index.md':
-                    full_path = os.path.join(root, f)
+#     try:
+#         for root, _, files in os.walk(markdown_dir):
+#             for f in files:
+#                 if f.endswith('.md') and f != '_index.md':
+#                     full_path = os.path.join(root, f)
 
-                    # Create the display path based on the relative directory structure
-                    relative_root = os.path.relpath(root, markdown_dir)
-                    if relative_root == ".":
-                        display_path = f"Content -> {f}"
-                    elif "blog" in relative_root.lower():
-                        display_path = f"Content -> Blog -> {relative_root.replace(os.sep, ' -> ')} -> {f}"
-                    else:
-                        display_path = f"Content -> {relative_root.replace(os.sep, ' -> ')} -> {f}"
+#                     # Create the display path based on the relative directory structure
+#                     relative_root = os.path.relpath(root, markdown_dir)
+#                     if relative_root == ".":
+#                         display_path = f"Content -> {f}"
+#                     elif "blog" in relative_root.lower():
+#                         display_path = f"Content -> Blog -> {relative_root.replace(os.sep, ' -> ')} -> {f}"
+#                     else:
+#                         display_path = f"Content -> {relative_root.replace(os.sep, ' -> ')} -> {f}"
 
-                    markdown_files.append(display_path)
+#                     markdown_files.append(display_path)
 
-        # Optionally filter by section
-        if section:
-            markdown_files = [f for f in markdown_files if section in f]
+#         # Optionally filter by section
+#         if section:
+#             markdown_files = [f for f in markdown_files if section in f]
 
-        # Implement pagination
-        start = (page - 1) * limit
-        end = start + limit
-        return markdown_files[start:end], len(markdown_files)  # Return both the files and total count
+#         # Implement pagination
+#         start = (page - 1) * limit
+#         end = start + limit
+#         return markdown_files[start:end], len(markdown_files)  # Return both the files and total count
 
-    except FileNotFoundError:
-        logging.error(f"Markdown directory not found: {markdown_dir}")
-        return [], 0
-    except PermissionError:
-        logging.error(f"Permission denied accessing: {markdown_dir}")
-        return [], 0
+#     except FileNotFoundError:
+#         logging.error(f"Markdown directory not found: {markdown_dir}")
+#         return [], 0
+#     except PermissionError:
+#         logging.error(f"Permission denied accessing: {markdown_dir}")
+#         return [], 0
 
 
 
