@@ -533,33 +533,33 @@ async def delete_blog_post(request: Request, category: str, file_name: str, subc
 
 #     return templates.TemplateResponse("new_template.html", {"request": request, "user": user})
 
-@app.post("/templates/new/")
-async def new_template_post(request: Request, template_name: str = Form(...), content: str = Form(...)):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
+# @app.post("/templates/new/")
+# async def new_template_post(request: Request, template_name: str = Form(...), content: str = Form(...)):
+#     user = get_logged_in_user(request)
+#     if not user:
+#         return RedirectResponse(url="/login/", status_code=303)
 
-    template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
+#     template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
 
-    try:
-        with open(template_path, 'w') as f:
-            f.write(content)
-    except OSError as e:
-        logging.error(f"Error writing to file: {template_path}, {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create the template file.")
+#     try:
+#         with open(template_path, 'w') as f:
+#             f.write(content)
+#     except OSError as e:
+#         logging.error(f"Error writing to file: {template_path}, {str(e)}")
+#         raise HTTPException(status_code=500, detail="Failed to create the template file.")
 
-    # Commit the new template to Git
-    try:
-        repo = Repo(GIT_REPO_PATH)
-        repo.git.add(template_path)
-        repo.index.commit(f"Add new template: {template_name}")
-        origin = repo.remote(name="origin")
-        origin.push()
-    except Exception as e:
-        logging.error(f"Git operation failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
+#     # Commit the new template to Git
+#     try:
+#         repo = Repo(GIT_REPO_PATH)
+#         repo.git.add(template_path)
+#         repo.index.commit(f"Add new template: {template_name}")
+#         origin = repo.remote(name="origin")
+#         origin.push()
+#     except Exception as e:
+#         logging.error(f"Git operation failed: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-    return RedirectResponse(url="/templates/", status_code=303)
+#     return RedirectResponse(url="/templates/", status_code=303)
 
 @app.get("/templates/edit/{template_name}", response_class=HTMLResponse)
 async def edit_template(request: Request, template_name: str):
