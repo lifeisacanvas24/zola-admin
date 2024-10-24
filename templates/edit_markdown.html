@@ -1,49 +1,88 @@
-{% extends "base.html" %}
+<!-- please check if this file is required or not -->
 
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
     <h1 class="title is-3">Edit Markdown File: {{ file_name }}</h1>
     <form action="/markdown/edit/{{ file_name }}" method="post">
         <div class="field">
             <label class="label">Title</label>
             <div class="control">
-                <input class="input" type="text" name="title" value="{{ front_matter.title }}" required>
+                <input
+                    class="input"
+                    type="text"
+                    name="title"
+                    value="{{ front_matter.title }}"
+                    required
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">Description</label>
             <div class="control">
-                <input class="input" type="text" name="description" value="{{ front_matter.description }}" required>
+                <input
+                    class="input"
+                    type="text"
+                    name="description"
+                    value="{{ front_matter.description }}"
+                    required
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">Date</label>
             <div class="control">
-                <input class="input" type="datetime-local" name="date" value="{{ front_matter.date }}" required>
+                <input
+                    class="input"
+                    type="datetime-local"
+                    name="date"
+                    value="{{ front_matter.date }}"
+                    required
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">Draft</label>
             <div class="control">
-                <input type="checkbox" name="draft" {% if front_matter.draft %}checked{% endif %}>
+                <input
+                    type="checkbox"
+                    name="draft"
+                    {%
+                    if
+                    front_matter.draft
+                    %}checked{%
+                    endif
+                    %}
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">OG Image</label>
             <div class="control">
-                <input class="input" type="text" name="og_image" value="{{ front_matter.social_image }}">
+                <input
+                    class="input"
+                    type="text"
+                    name="og_image"
+                    value="{{ front_matter.social_image }}"
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">Keywords</label>
             <div class="control">
-                <input class="input" type="text" name="keywords" value="{{ front_matter.tags|join(', ') }}">
+                <input
+                    class="input"
+                    type="text"
+                    name="keywords"
+                    value="{{ front_matter.tags|join(', ') }}"
+                />
             </div>
         </div>
         <div class="field">
             <label class="label">Content</label>
             <div class="control">
-                <textarea class="textarea" name="content" rows="10">{{ markdown_content }}</textarea>
+                <textarea class="textarea" name="content" rows="10">
+{{ markdown_content }}</textarea
+                >
             </div>
         </div>
         <button class="button is-link" type="submit">Save Changes</button>

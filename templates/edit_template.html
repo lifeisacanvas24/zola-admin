@@ -1,46 +1,57 @@
-{% extends "base.html" %}
+<!-- please check if this file is required or not -->
 
-{% block content %}
-    <h1>Edit Template: {{ template_name }}</h1>
-    <form action="/templates/edit/{{ template_name }}" method="post">
-        <!-- Toast UI editor container -->
-        <div id="editor"></div>
+{% extends "base.html" %} {% block content %}
+<h1>Edit Template: {{ template_name }}</h1>
+<form action="/templates/edit/{{ template_name }}" method="post">
+    <!-- Toast UI editor container -->
+    <div id="editor"></div>
 
-        <!-- Hidden textarea to hold the editor content -->
-        <textarea name="content" id="editor-content" style="display:none;">{{ content }}</textarea>
+    <!-- Hidden textarea to hold the editor content -->
+    <textarea name="content" id="editor-content" style="display: none">
+{{ content }}</textarea
+    >
 
-        <button type="submit" onclick="submitContent()">Save Changes</button>
-    </form>
-    <a href="/templates/">Back to Templates</a>
+    <button type="submit" onclick="submitContent()">Save Changes</button>
+</form>
+<a href="/templates/">Back to Templates</a>
 
-    <!-- Include Toast UI CSS and JS -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-    <!-- Additional plugin styles, if necessary -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css">
+<!-- Include Toast UI CSS and JS -->
+<link
+    rel="stylesheet"
+    href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"
+/>
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<!-- Additional plugin styles, if necessary -->
+<link
+    rel="stylesheet"
+    href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css"
+/>
+<link
+    rel="stylesheet"
+    href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css"
+/>
 
-    <script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
-    <script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
-    <script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+<script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
 
-    <script>
-        // Initialize the Toast UI editor with plugins
-        const editor = new toastui.Editor({
-            el: document.querySelector('#editor'),
-            initialEditType: 'markdown',
-            previewStyle: 'vertical',
-            height: '500px',
-            initialValue: `{{ content }}`,
-            plugins: [
-                toastui.Editor.plugin.chart,  // Charts plugin
-                toastui.Editor.plugin.codeSyntaxHighlight,  // Syntax highlighting for code blocks
-            ]
-        });
+<script>
+    // Initialize the Toast UI editor with plugins
+    const editor = new toastui.Editor({
+        el: document.querySelector("#editor"),
+        initialEditType: "markdown",
+        previewStyle: "vertical",
+        height: "500px",
+        initialValue: `{{ content }}`,
+        plugins: [
+            toastui.Editor.plugin.chart, // Charts plugin
+            toastui.Editor.plugin.codeSyntaxHighlight, // Syntax highlighting for code blocks
+        ],
+    });
 
-        // Function to set editor content to textarea on form submit
-        function submitContent() {
-            document.getElementById('editor-content').value = editor.getMarkdown();
-        }
-    </script>
+    // Function to set editor content to textarea on form submit
+    function submitContent() {
+        document.getElementById("editor-content").value = editor.getMarkdown();
+    }
+</script>
 {% endblock %}
