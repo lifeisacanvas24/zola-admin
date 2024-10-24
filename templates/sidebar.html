@@ -1,18 +1,40 @@
 <!-- templates/sidebar.html -->
 {% if user %}
+
+<!-- only if user is valud -->
 <aside class="menu">
     <span class="icon"><i class="fas fa-tags"></i></span>Manage Users
     <ul class="menu-list">
-        <li><a href="/users/"><span class="icon"><i class="fas fa-list"></i></span> View Users</a></li>
-        <li><a href="/add-user/"><span class="icon"><i class="fas fa-user-plus"></i></span>Add User</a></li>
+        <li>
+            <a href="/users/"
+                ><span class="icon"><i class="fas fa-list"></i></span> View
+                Users</a
+            >
+        </li>
+        <li>
+            <a href="/add-user/"
+                ><span class="icon"><i class="fas fa-user-plus"></i></span>Add
+                User</a
+            >
+        </li>
     </ul>
 
     <span class="icon"><i class="fas fa-tags"></i></span>Manage Blog
     <ul class="menu-list">
-        <li><a href="/add-new-post/"><span class="icon"><i class="fas fa-plus"></i></span>Add Post</a></li>
-        <li><a href="/list-posts/"><span class="icon"><i class="fas fa-list"></i></span>List Posts</a></li>
+        <li>
+            <a href="/add-new-post/"
+                ><span class="icon"><i class="fas fa-plus"></i></span>Add
+                Post</a
+            >
+        </li>
+        <li>
+            <a href="/list-posts/"
+                ><span class="icon"><i class="fas fa-list"></i></span>List
+                Posts</a
+            >
+        </li>
     </ul>
-<!--
+    <!--
     <span class="icon"><i class="fas fa-tags"></i></span>Manage Categories
     <ul class="menu-list">
         <li>
@@ -57,14 +79,12 @@
         </li>
     </ul>
  -->
-<!--
+    <!--
  <span class="icon"><i class="fas fa-code-branch"></i></span>Manage Git
     <ul class="menu-list">
         <li><a href="/admin/blog/git/files/"><span class="icon"><i class="fas fa-list"></i></span> List Git Files</a></li>
         <li><a href="/admin/blog/git/add-file/"><span class="icon"><i class="fas fa-plus"></i></span> Add Git File</a></li>
         <li><a href="/admin/blog/git/remove-file/"><span class="icon"><i class="fas fa-trash-alt"></i></span> Remove Git File</a></li>
     </ul>
--->
-
-</aside>
+--></aside>
 {% endif %}
