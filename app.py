@@ -610,33 +610,33 @@ async def edit_template_post(request: Request, template_name: str, content: str 
 
     return RedirectResponse(url="/templates/", status_code=303)
 
-@app.get("/templates/delete/{template_name}")
-async def delete_template(request: Request, template_name: str):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
+# @app.get("/templates/delete/{template_name}")
+# async def delete_template(request: Request, template_name: str):
+#     user = get_logged_in_user(request)
+#     if not user:
+#         return RedirectResponse(url="/login/", status_code=303)
 
-    template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
-    if not os.path.exists(template_path):
-        raise HTTPException(status_code=404, detail="Template not found")
+#     template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
+#     if not os.path.exists(template_path):
+#         raise HTTPException(status_code=404, detail="Template not found")
 
-    try:
-        os.remove(template_path)
-    except OSError as e:
-        logging.error(f"Error deleting file: {template_path}, {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to delete the template file.")
+#     try:
+#         os.remove(template_path)
+#     except OSError as e:
+#         logging.error(f"Error deleting file: {template_path}, {str(e)}")
+#         raise HTTPException(status_code=500, detail="Failed to delete the template file.")
 
-    try:
-        repo = Repo(GIT_REPO_PATH)
-        repo.git.rm(template_path)
-        repo.index.commit(f"Delete template: {template_name}")
-        origin = repo.remote(name="origin")
-        origin.push()
-    except Exception as e:
-        logging.error(f"Git operation failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
+#     try:
+#         repo = Repo(GIT_REPO_PATH)
+#         repo.git.rm(template_path)
+#         repo.index.commit(f"Delete template: {template_name}")
+#         origin = repo.remote(name="origin")
+#         origin.push()
+#     except Exception as e:
+#         logging.error(f"Git operation failed: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
 
-    return RedirectResponse(url="/templates/", status_code=303)
+#     return RedirectResponse(url="/templates/", status_code=303)
 
 @app.get("/add-new-post/", response_class=HTMLResponse)
 async def new_post(request: Request, category: Optional[str] = None, subcategory: Optional[str] = None, file_name: Optional[str] = None):
