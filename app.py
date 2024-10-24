@@ -516,14 +516,14 @@ async def delete_blog_post(request: Request, category: str, file_name: str, subc
 
     return RedirectResponse(url="/list-posts/", status_code=303)
 
-@app.get("/templates/", response_class=HTMLResponse)
-async def templates_index(request: Request):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
+# @app.get("/templates/", response_class=HTMLResponse)
+# async def templates_index(request: Request):
+#     user = get_logged_in_user(request)
+#     if not user:
+#         return RedirectResponse(url="/login/", status_code=303)
 
-    templates_list = list_html_templates()
-    return templates.TemplateResponse("templates.html", {"request": request, "templates": templates_list, "user": user})
+#     templates_list = list_html_templates()
+#     return templates.TemplateResponse("templates.html", {"request": request, "templates": templates_list, "user": user})
 
 @app.get("/templates/new/", response_class=HTMLResponse)
 async def new_template(request: Request):
