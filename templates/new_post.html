@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-
+<!-- this should be fixed too, for some reason the left nav section does not appear -->
 <section class="section">
     <div class="container">
         <h1 class="title">
@@ -38,39 +38,69 @@
                 <label class="label" for="category">Category</label>
                 <div class="control">
                     <div class="select">
-                       <select id="category" name="category" required>
+                        <select id="category" name="category" required>
                             <option value="">Select Category</option>
                             <option
                                 value="lifestyle"
-                                {% if category == "lifestyle" %}selected{% endif %}
+                                {%
+                                if
+                                category=""
+                                ="lifestyle"
+                                %}selected{%
+                                endif
+                                %}
                             >
                                 Lifestyle
                             </option>
                             <option
                                 value="technology"
-                                {% if category == "technology" %}selected{% endif %}
+                                {%
+                                if
+                                category=""
+                                ="technology"
+                                %}selected{%
+                                endif
+                                %}
                             >
                                 Technology
                             </option>
                             <option
                                 value="reviews"
-                                {% if category == "reviews" %}selected{% endif %}
+                                {%
+                                if
+                                category=""
+                                ="reviews"
+                                %}selected{%
+                                endif
+                                %}
                             >
                                 Reviews
                             </option>
                             <option
                                 value="random-thoughts"
-                                {% if category == "random-thoughts" %}selected{% endif %}
+                                {%
+                                if
+                                category=""
+                                ="random-thoughts"
+                                %}selected{%
+                                endif
+                                %}
                             >
                                 Random Thoughts
                             </option>
                             <option
                                 value="stock-market"
-                                {% if category == "stock-market" %}selected{% endif %}
+                                {%
+                                if
+                                category=""
+                                ="stock-market"
+                                %}selected{%
+                                endif
+                                %}
                             >
                                 Stock Market
                             </option>
-                                                   </select>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -163,7 +193,7 @@
             <h3 class="subtitle">Open Graph Metadata</h3>
             <div class="field">
                 <label class="checkbox">
-                  <input type="checkbox" id="og-metadata-toggle" />
+                    <input type="checkbox" id="og-metadata-toggle" />
                     Copy from Front Matter
                 </label>
             </div>
@@ -231,7 +261,7 @@
             <h3 class="subtitle">JSON-LD Metadata</h3>
             <div class="field">
                 <label class="checkbox">
-                   <input type="checkbox" id="json-ld-metadata-toggle" />
+                    <input type="checkbox" id="json-ld-metadata-toggle" />
                     Copy from Front Matter
                 </label>
             </div>
@@ -278,7 +308,11 @@
                 <label class="label" for="editor-content">Content</label>
                 <div class="control">
                     <div id="editor"></div>
-                    <textarea id="editor-content" name="content" style="display: none"></textarea>
+                    <textarea
+                        id="editor-content"
+                        name="content"
+                        style="display: none"
+                    ></textarea>
                 </div>
             </div>
 
@@ -301,122 +335,144 @@
 />
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
-
 <script>
-// Define functions globally
+    // Define functions globally
     function validateForm() {
         document.getElementById("editor-content").value = editor.getMarkdown();
         return true;
     }
 
-   // Update subcategories based on selected category
+    // Update subcategories based on selected category
 
-   function updateSubcategories() {
-       const category = document.getElementById('category').value;
-       const subcategory = document.getElementById('subcategory');
+    function updateSubcategories() {
+        const category = document.getElementById("category").value;
+        const subcategory = document.getElementById("subcategory");
 
-       if (!subcategory) {
-           console.error("Subcategory select element not found");
-           return;
-       }
+        if (!subcategory) {
+            console.error("Subcategory select element not found");
+            return;
+        }
 
-       subcategory.innerHTML = '';  // Clear previous options
+        subcategory.innerHTML = ""; // Clear previous options
 
-       if (subcategories[category]) {
-           subcategories[category].forEach(sub => {
-               const option = document.createElement('option');
-               option.value = sub.toLowerCase().replace(/\s+/g, '-');
-               option.textContent = sub;
-               option.selected = (option.value === "{{ subcategory }}");
-               subcategory.appendChild(option);
-           });
-           subcategory.disabled = false;
-       } else {
-           const noneOption = document.createElement('option');
-           noneOption.value = "";
-           noneOption.textContent = "None";
-           subcategory.appendChild(noneOption);
-           subcategory.disabled = true;
-       }
-   }
+        if (subcategories[category]) {
+            subcategories[category].forEach((sub) => {
+                const option = document.createElement("option");
+                option.value = sub.toLowerCase().replace(/\s+/g, "-");
+                option.textContent = sub;
+                option.selected = option.value === "{{ subcategory }}";
+                subcategory.appendChild(option);
+            });
+            subcategory.disabled = false;
+        } else {
+            const noneOption = document.createElement("option");
+            noneOption.value = "";
+            noneOption.textContent = "None";
+            subcategory.appendChild(noneOption);
+            subcategory.disabled = true;
+        }
+    }
 
-   // Call updateSubcategories when the page loads
-   document.addEventListener("DOMContentLoaded", function() {
-       updateSubcategories();
-   });
+    // Call updateSubcategories when the page loads
+    document.addEventListener("DOMContentLoaded", function () {
+        updateSubcategories();
+    });
 
-   function constructURL(category, subcategory, templateName) {
-     // Build the base URL inside the function to avoid appending multiple times
-     let permaLink = `http://lifeisacanvas24.github.io/blog/${category}/`;
+    function constructURL(category, subcategory, templateName) {
+        // Build the base URL inside the function to avoid appending multiple times
+        let permaLink = `http://lifeisacanvas24.github.io/blog/${category}/`;
 
-     // Check if subcategory exists and append it to the URL if it does
-     if (subcategory && subcategory.trim() !== "") {
-       permaLink += `${subcategory}/`;
-     }
+        // Check if subcategory exists and append it to the URL if it does
+        if (subcategory && subcategory.trim() !== "") {
+            permaLink += `${subcategory}/`;
+        }
 
-     // Append the template name to the URL
-     permaLink += `${templateName.toLowerCase().replace(/\s+/g, "-")}/`;
+        // Append the template name to the URL
+        permaLink += `${templateName.toLowerCase().replace(/\s+/g, "-")}/`;
 
-     return permaLink;
-   }
+        return permaLink;
+    }
 
-   function toggleOgMetadata() {
-     const isChecked = document.getElementById("og-metadata-toggle").checked;
-     if (isChecked) {
-       const templateName = document.getElementById("template_name").value;
-       const description = document.getElementById("description").value;
-       const category = document.getElementById("category").value;
-       const subcategory = document.getElementById("subcategory").value;
+    function toggleOgMetadata() {
+        const isChecked = document.getElementById("og-metadata-toggle").checked;
+        if (isChecked) {
+            const templateName = document.getElementById("template_name").value;
+            const description = document.getElementById("description").value;
+            const category = document.getElementById("category").value;
+            const subcategory = document.getElementById("subcategory").value;
 
-       document.getElementById("og_title").value = templateName;
-       document.getElementById("og_description").value = description;
+            document.getElementById("og_title").value = templateName;
+            document.getElementById("og_description").value = description;
 
-       // Set the og_url field to the constructed URL using constructURL function
-       document.getElementById("og_url").value = constructURL(category, subcategory, templateName);
-       document.getElementById("og_type").value = "post";
-     }
-   }
+            // Set the og_url field to the constructed URL using constructURL function
+            document.getElementById("og_url").value = constructURL(
+                category,
+                subcategory,
+                templateName,
+            );
+            document.getElementById("og_type").value = "post";
+        }
+    }
 
-   // Add event listener for OG Metadata toggle
-   document.addEventListener("DOMContentLoaded", function() {
-     const ogMetadataToggle = document.getElementById("og-metadata-toggle");
-     if (ogMetadataToggle) {
-       ogMetadataToggle.addEventListener("change", toggleOgMetadata);
-     } else {
-       console.error("OG Metadata toggle element not found");
-     }
-   });
+    // Add event listener for OG Metadata toggle
+    document.addEventListener("DOMContentLoaded", function () {
+        const ogMetadataToggle = document.getElementById("og-metadata-toggle");
+        if (ogMetadataToggle) {
+            ogMetadataToggle.addEventListener("change", toggleOgMetadata);
+        } else {
+            console.error("OG Metadata toggle element not found");
+        }
+    });
 
-   function toggleJsonLdMetadata() {
-     const isChecked = document.getElementById("json-ld-metadata-toggle").checked;
-     if (isChecked) {
-       const templateName = document.getElementById("template_name").value;
-       const description = document.getElementById("description").value;
-       const category = document.getElementById("category").value;
-       const subcategory = document.getElementById("subcategory").value;
+    function toggleJsonLdMetadata() {
+        const isChecked = document.getElementById(
+            "json-ld-metadata-toggle",
+        ).checked;
+        if (isChecked) {
+            const templateName = document.getElementById("template_name").value;
+            const description = document.getElementById("description").value;
+            const category = document.getElementById("category").value;
+            const subcategory = document.getElementById("subcategory").value;
 
-       document.getElementById("json_ld_name").value = templateName;
-       document.getElementById("json_ld_description").value = description;
+            document.getElementById("json_ld_name").value = templateName;
+            document.getElementById("json_ld_description").value = description;
 
-       // Set the json_ld_url field to the constructed URL using constructURL function
-       document.getElementById("json_ld_url").value = constructURL(category, subcategory, templateName);
-     }
-   }
+            // Set the json_ld_url field to the constructed URL using constructURL function
+            document.getElementById("json_ld_url").value = constructURL(
+                category,
+                subcategory,
+                templateName,
+            );
+        }
+    }
 
-   // Add event listener for JSON-LD Metadata toggle
-   document.addEventListener("DOMContentLoaded", function() {
-     const jsonLdMetadataToggle = document.getElementById("json-ld-metadata-toggle");
-     if (jsonLdMetadataToggle) {
-       jsonLdMetadataToggle.addEventListener("change", toggleJsonLdMetadata);
-     } else {
-       console.error("JSON-LD Metadata toggle element not found");
-     }
-   });
+    // Add event listener for JSON-LD Metadata toggle
+    document.addEventListener("DOMContentLoaded", function () {
+        const jsonLdMetadataToggle = document.getElementById(
+            "json-ld-metadata-toggle",
+        );
+        if (jsonLdMetadataToggle) {
+            jsonLdMetadataToggle.addEventListener(
+                "change",
+                toggleJsonLdMetadata,
+            );
+        } else {
+            console.error("JSON-LD Metadata toggle element not found");
+        }
+    });
 
     // Global variables
     let editor;
     const subcategories = {
-        "lifestyle": ["Parenting", "Yoga", "Travel", "Food", "Fashion", "Minimalism", "Health and Wellness"],
+        lifestyle: [
+            "Parenting",
+            "Yoga",
+            "Travel",
+            "Food",
+            "Fashion",
+            "Minimalism",
+            "Health and Wellness",
+        ],
         //"technology": ["Gadgets", "AI", "Programming"],
         //"reviews": ["Books", "Movies", "Products"],
         //"random-thoughts": [],
@@ -424,52 +480,61 @@
     };
 
     document.addEventListener("DOMContentLoaded", function () {
-           try {
-               // Get the initial content safely from the template
-               let initialContent = `{{ content | safe }}`;
+        try {
+            // Get the initial content safely from the template
+            let initialContent = `{{ content | safe }}`;
 
-               // Escape the initial content for safe JS usage
-               initialContent = initialContent.replace(/\\/g, '\\\\') // Escape backslashes
-                                              .replace(/'/g, "\\'")  // Escape single quotes
-                                              .replace(/"/g, '\\"')  // Escape double quotes
-                                              .replace(/`/g, '\\`')  // Escape backticks
-                                              .replace(/</g, "&lt;") // Escape less than
-                                              .replace(/>/g, "&gt;") // Escape greater than
-                                              .replace(/\r?\n/g, "\n"); // Normalize new lines
+            // Escape the initial content for safe JS usage
+            initialContent = initialContent
+                .replace(/\\/g, "\\\\") // Escape backslashes
+                .replace(/'/g, "\\'") // Escape single quotes
+                .replace(/"/g, '\\"') // Escape double quotes
+                .replace(/`/g, "\\`") // Escape backticks
+                .replace(/</g, "&lt;") // Escape less than
+                .replace(/>/g, "&gt;") // Escape greater than
+                .replace(/\r?\n/g, "\n"); // Normalize new lines
 
-               const editorContainer = document.querySelector("#editor");
-               if (!editorContainer) {
-                   throw new Error("Editor container not found");
-               }
+            const editorContainer = document.querySelector("#editor");
+            if (!editorContainer) {
+                throw new Error("Editor container not found");
+            }
 
-               editor = new toastui.Editor({
-                   el: editorContainer,
-                   height: "500px",
-                   initialEditType: "markdown",
-                   previewStyle: "vertical",
-                   initialValue: initialContent
-               });
+            editor = new toastui.Editor({
+                el: editorContainer,
+                height: "500px",
+                initialEditType: "markdown",
+                previewStyle: "vertical",
+                initialValue: initialContent,
+            });
 
-               // Update the hidden textarea with the editor content when the form is submitted
-               document.querySelector("form").addEventListener("submit", function() {
-                   document.getElementById("editor-content").value = editor.getMarkdown();
-               });
-
-           } catch (error) {
-               console.error("Error initializing editor:", error);
-               const editorContainer = document.querySelector("#editor");
-               if (editorContainer) {
-                   editorContainer.textContent = "Error loading editor. Please try refreshing the page.";
-               }
-           }
+            // Update the hidden textarea with the editor content when the form is submitted
+            document
+                .querySelector("form")
+                .addEventListener("submit", function () {
+                    document.getElementById("editor-content").value =
+                        editor.getMarkdown();
+                });
+        } catch (error) {
+            console.error("Error initializing editor:", error);
+            const editorContainer = document.querySelector("#editor");
+            if (editorContainer) {
+                editorContainer.textContent =
+                    "Error loading editor. Please try refreshing the page.";
+            }
+        }
 
         // Initialize subcategories and add event listeners
         updateSubcategories();
-        document.getElementById('category').addEventListener('change', updateSubcategories);
-        document.getElementById('og-metadata-toggle').addEventListener('change', toggleOgMetadata);
-        document.getElementById('json-ld-metadata-toggle').addEventListener('change', toggleJsonLdMetadata);
+        document
+            .getElementById("category")
+            .addEventListener("change", updateSubcategories);
+        document
+            .getElementById("og-metadata-toggle")
+            .addEventListener("change", toggleOgMetadata);
+        document
+            .getElementById("json-ld-metadata-toggle")
+            .addEventListener("change", toggleJsonLdMetadata);
     });
-
 </script>
 
 {% endblock %}
