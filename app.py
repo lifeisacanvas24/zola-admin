@@ -533,53 +533,53 @@ async def delete_blog_post(request: Request, category: str, file_name: str, subc
 
 #     return templates.TemplateResponse("new_template.html", {"request": request, "user": user})
 
-# @app.post("/templates/new/")
-# async def new_template_post(request: Request, template_name: str = Form(...), content: str = Form(...)):
+# # @app.post("/templates/new/")
+# # async def new_template_post(request: Request, template_name: str = Form(...), content: str = Form(...)):
+# #     user = get_logged_in_user(request)
+# #     if not user:
+# #         return RedirectResponse(url="/login/", status_code=303)
+
+# #     template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
+
+# #     try:
+# #         with open(template_path, 'w') as f:
+# #             f.write(content)
+# #     except OSError as e:
+# #         logging.error(f"Error writing to file: {template_path}, {str(e)}")
+# #         raise HTTPException(status_code=500, detail="Failed to create the template file.")
+
+# #     # Commit the new template to Git
+# #     try:
+# #         repo = Repo(GIT_REPO_PATH)
+# #         repo.git.add(template_path)
+# #         repo.index.commit(f"Add new template: {template_name}")
+# #         origin = repo.remote(name="origin")
+# #         origin.push()
+# #     except Exception as e:
+# #         logging.error(f"Git operation failed: {str(e)}")
+# #         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
+
+# #     return RedirectResponse(url="/templates/", status_code=303)
+
+# @app.get("/templates/edit/{template_name}", response_class=HTMLResponse)
+# async def edit_template(request: Request, template_name: str):
 #     user = get_logged_in_user(request)
 #     if not user:
 #         return RedirectResponse(url="/login/", status_code=303)
 
 #     template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
+#     if not os.path.exists(template_path):
+#         raise HTTPException(status_code=404, detail="Template not found")
 
-#     try:
-#         with open(template_path, 'w') as f:
-#             f.write(content)
-#     except OSError as e:
-#         logging.error(f"Error writing to file: {template_path}, {str(e)}")
-#         raise HTTPException(status_code=500, detail="Failed to create the template file.")
+#     with open(template_path) as f:
+#         template_content = f.read()
 
-#     # Commit the new template to Git
-#     try:
-#         repo = Repo(GIT_REPO_PATH)
-#         repo.git.add(template_path)
-#         repo.index.commit(f"Add new template: {template_name}")
-#         origin = repo.remote(name="origin")
-#         origin.push()
-#     except Exception as e:
-#         logging.error(f"Git operation failed: {str(e)}")
-#         raise HTTPException(status_code=500, detail="Failed to commit and push the changes to the repository.")
-
-#     return RedirectResponse(url="/templates/", status_code=303)
-
-@app.get("/templates/edit/{template_name}", response_class=HTMLResponse)
-async def edit_template(request: Request, template_name: str):
-    user = get_logged_in_user(request)
-    if not user:
-        return RedirectResponse(url="/login/", status_code=303)
-
-    template_path = os.path.join(TEMPLATE_DIR, f"{template_name}.html")
-    if not os.path.exists(template_path):
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    with open(template_path) as f:
-        template_content = f.read()
-
-    return templates.TemplateResponse("edit_template.html", {
-        "request": request,
-        "template_name": template_name,
-        "template_content": template_content,
-        "user": user
-    })
+#     return templates.TemplateResponse("edit_template.html", {
+#         "request": request,
+#         "template_name": template_name,
+#         "template_content": template_content,
+#         "user": user
+#     })
 
 @app.post("/templates/edit/{template_name}")
 async def edit_template_post(request: Request, template_name: str, content: str = Form(...)):
