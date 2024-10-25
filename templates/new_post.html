@@ -1,5 +1,7 @@
-{% extends "base.html" %} {% block content %}
 <!-- this should be fixed too, for some reason the left nav section does not appear -->
+{% extends "base.html" %} {% block title %}Create / Edit Post{% endblock %} {% block
+content %}
+
 <section class="section">
     <div class="container">
         <h1 class="title">
@@ -39,68 +41,23 @@
                 <div class="control">
                     <div class="select">
                         <select id="category" name="category" required>
-                            <option value="">Select Category</option>
-                            <option
-                                value="lifestyle"
-                                {%
-                                if
-                                category=""
-                                ="lifestyle"
-                                %}selected{%
-                                endif
-                                %}
-                            >
-                                Lifestyle
-                            </option>
-                            <option
-                                value="technology"
-                                {%
-                                if
-                                category=""
-                                ="technology"
-                                %}selected{%
-                                endif
-                                %}
-                            >
-                                Technology
-                            </option>
-                            <option
-                                value="reviews"
-                                {%
-                                if
-                                category=""
-                                ="reviews"
-                                %}selected{%
-                                endif
-                                %}
-                            >
-                                Reviews
-                            </option>
-                            <option
-                                value="random-thoughts"
-                                {%
-                                if
-                                category=""
-                                ="random-thoughts"
-                                %}selected{%
-                                endif
-                                %}
-                            >
-                                Random Thoughts
-                            </option>
-                            <option
-                                value="stock-market"
-                                {%
-                                if
-                                category=""
-                                ="stock-market"
-                                %}selected{%
-                                endif
-                                %}
-                            >
-                                Stock Market
-                            </option>
-                        </select>
+                                <option value="">Select Category</option>
+                                <option value="lifestyle" {% if category == "lifestyle" %}selected{% endif %}>
+                                    Lifestyle
+                                </option>
+                                <option value="technology" {% if category == "technology" %}selected{% endif %}>
+                                    Technology
+                                </option>
+                                <option value="reviews" {% if category == "reviews" %}selected{% endif %}>
+                                    Reviews
+                                </option>
+                                <option value="random-thoughts" {% if category == "random-thoughts" %}selected{% endif %}>
+                                    Random Thoughts
+                                </option>
+                                <option value="stock-market" {% if category == "stock-market" %}selected{% endif %}>
+                                    Stock Market
+                                </option>
+                            </select>
                     </div>
                 </div>
             </div>
