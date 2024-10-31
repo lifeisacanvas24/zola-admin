@@ -471,6 +471,7 @@ async def edit_markdown_post(
 
         return RedirectResponse(url="/list-posts/", status_code=303)
 
+## Need to check if we need both delete-post routes or just one is enough
 @app.post("/delete-post/{category}/{file_name}")
 @app.post("/delete-post/{category}/{subcategory:path}/{file_name}")
 async def delete_blog_post(request: Request, category: str, file_name: str, subcategory: Optional[str] = None):
