@@ -18,6 +18,7 @@ from passlib.hash import pbkdf2_sha256
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 
+##turn this off when in production.
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.basicConfig(level=logging.INFO)
