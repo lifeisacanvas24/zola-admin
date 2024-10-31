@@ -479,7 +479,7 @@ async def delete_blog_post(request: Request, category: str, file_name: str, subc
     if not user:
         return RedirectResponse(url="/login/", status_code=303)
 
-    # Construct the full path for deletion
+    # Construct the full path for deletion so that it would work properly.
     subcategory_path = subcategory if subcategory else ''
     full_path = os.path.join(category, subcategory_path, file_name)
     file_path = os.path.join(BLOG_CONTENT_PATH, full_path)
